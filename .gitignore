@@ -1,0 +1,6 @@
+*.dat
+*.out
+*.png
+*/halo_catalogs/*
+*/rockstar_halos/*
+*__pycache__*
