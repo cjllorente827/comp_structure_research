@@ -4,20 +4,17 @@
 # STEP 0
 # Decide how much work we need to do
 # MODE=1 #Create halo catalog, extract data from catalog, make plots
-#MODE=2 #Skip the halo catalog creation
+# MODE=2 #Skip the halo catalog creation
 MODE=3 #Skip the halo catalog creation and data extraction (plots only)
 
 # Parallel process settings
 NPROCS=4
 
 # File I/O settings
-#INFILE="$HOME/FOGGIE_analysis/smol_with_must_refine/RD0009"
 INFILE="$HOME/FOGGIE_analysis/FOGGIE_data/RD0036/RD0036"
-OUTFILE="stellar_mass_fraction_z0.30000.dat"
+OUTFILE="stellar_mass_fraction_z0.3.dat"
 
 ##########################################
-
-cd $HOME/FOGGIE_analysis/stellar_mass_fraction
 
 ##########################################
 # STEP 1
@@ -45,7 +42,7 @@ fi
 ##########################################
 if [ $MODE -lt 3 ]
 then
-   python calculate_stellar_mass_fraction.py $INFILE
+   python calculate_stellar_mass_fraction.py $INFILE $OUTFILE
 fi
 ##########################################
 # STEP 3

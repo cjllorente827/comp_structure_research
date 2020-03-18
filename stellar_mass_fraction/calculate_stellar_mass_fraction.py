@@ -1,10 +1,16 @@
 import sys
 import yt
+
 from tqdm import tqdm
+from time import time
 from collections import OrderedDict
 from yt.extensions.astro_analysis.halo_analysis.api import HaloCatalog
 import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import AxesGrid
+import pymp
+NUM_THREADS = pymp.config.num_threads[0]
+from HaloData import HaloData, Fields
+import numpy as np
 
 def stars(pfilter, data):
     filter = data[("all", "particle_type")] == 2 # DM = 1, Stars = 2
@@ -15,53 +21,51 @@ yt.add_particle_filter("stars", function=stars, filtered_type='all', \
 
 def extract_data_to_dat_file(hc, ds, outfile):
 
-    omega_b = 0.0486
-    omega_c = 0.2589
-    baryonic_mass_fraction = omega_b * ds.cosmology.omega_matter
-    fields = OrderedDict()
-    data_string = ""
+    num_halos = len(hc.catalog)
+    hd = HaloData(num_halos)
 
-    print(f"Parsing halo catalogs.....")
-    for halo in tqdm(hc.catalog):
-        
-        fields["Halo Id"] = halo['particle_identifier']
+    print("Parsing halo catalogs.....")
+    with pymp.Parallel(NUM_THREADS) as p:
+        for i in p.xrange(num_halos-1,-1,-1):
+            print(f"Thread {p.thread_num} working on Halo {i}")
+            halo = hc.catalog[i]
+            halo_pos = (
+                halo['particle_position_x'],
+                halo['particle_position_y'],
+                halo['particle_position_z']
+            )
 
-        halo_pos = (halo['particle_position_x'],halo['particle_position_y'],halo['particle_position_z'])
+            radius = halo['virial_radius'].in_units('kpc')
+            sphere = ds.sphere(halo_pos, radius)
+            totals = sphere.quantities.total_mass().in_units('Msun').value
+            stellar_mass = sphere[('stars', 'particle_mass')].sum().in_units('Msun').value
 
-        fields["Xpos"] = halo_pos[0].in_units('kpc').value
-        fields["Ypos"] = halo_pos[1].in_units('kpc').value
-        fields["Zpos"] = halo_pos[2].in_units('kpc').value
-        
-        fields["Radius"] = halo['virial_radius'].in_units('kpc')
-        sphere = ds.sphere(halo_pos, fields["Radius"])
-            
-        stellar_mass = sphere[('stars', 'particle_mass')].sum().in_units('Msun').value
-        gas_mass = sphere.quantities.total_mass()[0].in_units('Msun').value
-        total_mass = sphere.quantities.total_mass().sum().in_units('Msun').value
-        dm_mass = omega_c * total_mass
-        b_mass  = omega_b * total_mass
-        baryonic_mass = gas_mass + stellar_mass
-        mass_fraction = stellar_mass/baryonic_mass
+            omega_b = 0.0486
+            omega_c = 0.2589
+            omega_m = omega_b + omega_c
+            baryonic_mass_fraction = omega_b / omega_m
+    
+            gas_mass = totals[0]
+            total_mass = np.sum(totals)
+            dm_mass = total_mass - gas_mass - stellar_mass
+            baryon_mass = gas_mass + stellar_mass
+            str_mass_fraction = stellar_mass / baryonic_mass_fraction / total_mass
 
-        fields["Stellar Mass"] = stellar_mass
-        fields["Baryon Mass"] = baryonic_mass
-        fields["Gas Mass"] = gas_mass
-        fields["Star Mass Fraction"] = mass_fraction
-        fields["Dark Matter Mass"] = dm_mass
-        fields["Total Mass"] = total_mass
-        
-        tabs = 20
-        try : header
-        except NameError:
-            header = '\t'.join(fields.keys()).expandtabs(tabs) + '\n'
-        try : format_str
-        except NameError:
-            format_str = '\t'.join(['%3d'] + ["%.3e"]*(len(fields.keys())-1)) + '\n'
-        data_string += (format_str % tuple([x for x in fields.values()])) .expandtabs(tabs)
-        
-    with open(outfile, "w+") as f:
-        f.write(header + data_string)
-    print(f"Data written to {outfile}")
+            hd.halos[i,Fields.HALO_ID] = halo['particle_identifier']
+            hd.halos[i,Fields.RADIUS] = radius.value
+            hd.halos[i,Fields.XPOS] = halo_pos[0].in_units('kpc').value
+            hd.halos[i,Fields.YPOS] = halo_pos[1].in_units('kpc').value
+            hd.halos[i,Fields.ZPOS] = halo_pos[2].in_units('kpc').value
+            hd.halos[i,Fields.STR_MASS] = stellar_mass
+            hd.halos[i,Fields.GAS_MASS] = gas_mass
+            hd.halos[i,Fields.BAR_MASS] = baryon_mass
+            hd.halos[i,Fields.DM_MASS] = dm_mass
+            hd.halos[i,Fields.STR_MASS_FRAC] = str_mass_fraction
+            hd.halos[i,Fields.TOT_MASS] = total_mass
+            print(f"    Thread {p.thread_num} finished Halo {i}")
+    print("All halos parsed.")
+    return hd
+
 
 def annotate_halos(hc, ds):
     fig = plt.figure()
@@ -111,22 +115,23 @@ def main(infile, outfile):
         print(f"Reading from {infile}")
         ds = yt.load(infile)
         ds.add_particle_filter('stars')
-        outfile = outfile % ds.current_redshift
-        # hds = yt.load("halo_catalogs/catalog/catalog.0.h5")
         hds = yt.load("rockstar_halos/halos_0.0.bin")
 
         hc = HaloCatalog(data_ds=ds, halos_ds=hds)
         hc.load()
 
-        #extract_data_to_dat_file(hc, ds, outfile)
-        annotate_halos(hc, ds)
+        start_time = time()
+        hd = extract_data_to_dat_file(hc, ds, outfile)
+        elapsed = time() - start_time
+        print(f"Halo data extraction took {elapsed} seconds on {NUM_THREADS} threads")
+        hd.save_to_file(outfile)
+        #annotate_halos(hc, ds)
 
 if __name__ == "__main__":
-    
-    OUTFILE = "stellar_mass_fraction_z%.5f.dat"
 
     infile = sys.argv[1]
+    outfile = sys.argv[2]
 
-    main(infile, OUTFILE)
+    main(infile, outfile)
 
     
