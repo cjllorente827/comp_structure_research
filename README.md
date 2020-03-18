@@ -1,8 +1,8 @@
 # Research Notes
 
 TODO:
-1) Calculate stellar mass fraction using cosmo parameters
-
+1) Calculate stellar mass fraction like this
+<img src="https://render.githubusercontent.com/render/math?math=f =\frac{\displaystyle M_*}{\displaystyle \frac{\Omega_b}{\Omega_m}M_{vir}}">
 
 2) Parallelize analysis scripts in preparation for big box analysis
 
