@@ -22,12 +22,11 @@ yt.add_particle_filter("stars", function=stars, filtered_type='all', \
 def extract_data_to_dat_file(hc, ds, outfile):
 
     num_halos = len(hc.catalog)
-    hd = HaloData(num_halos)
-
+    halos = pymp.shared.array( (num_halos,Fields.NUM_FIELDS) )
     print("Parsing halo catalogs.....")
     with pymp.Parallel(NUM_THREADS) as p:
         for i in p.xrange(num_halos-1,-1,-1):
-            print(f"Thread {p.thread_num} working on Halo {i}")
+            # print(f"Thread {p.thread_num} working on Halo {i}")
             halo = hc.catalog[i]
             halo_pos = (
                 halo['particle_position_x'],
@@ -51,20 +50,20 @@ def extract_data_to_dat_file(hc, ds, outfile):
             baryon_mass = gas_mass + stellar_mass
             str_mass_fraction = stellar_mass / baryonic_mass_fraction / total_mass
 
-            hd.halos[i,Fields.HALO_ID] = halo['particle_identifier']
-            hd.halos[i,Fields.RADIUS] = radius.value
-            hd.halos[i,Fields.XPOS] = halo_pos[0].in_units('kpc').value
-            hd.halos[i,Fields.YPOS] = halo_pos[1].in_units('kpc').value
-            hd.halos[i,Fields.ZPOS] = halo_pos[2].in_units('kpc').value
-            hd.halos[i,Fields.STR_MASS] = stellar_mass
-            hd.halos[i,Fields.GAS_MASS] = gas_mass
-            hd.halos[i,Fields.BAR_MASS] = baryon_mass
-            hd.halos[i,Fields.DM_MASS] = dm_mass
-            hd.halos[i,Fields.STR_MASS_FRAC] = str_mass_fraction
-            hd.halos[i,Fields.TOT_MASS] = total_mass
-            print(f"    Thread {p.thread_num} finished Halo {i}")
+            halos[i,Fields.HALO_ID] = halo['particle_identifier']
+            halos[i,Fields.RADIUS] = radius.value
+            halos[i,Fields.XPOS] = halo_pos[0].in_units('kpc').value
+            halos[i,Fields.YPOS] = halo_pos[1].in_units('kpc').value
+            halos[i,Fields.ZPOS] = halo_pos[2].in_units('kpc').value
+            halos[i,Fields.STR_MASS] = stellar_mass
+            halos[i,Fields.GAS_MASS] = gas_mass
+            halos[i,Fields.BAR_MASS] = baryon_mass
+            halos[i,Fields.DM_MASS] = dm_mass
+            halos[i,Fields.STR_MASS_FRAC] = str_mass_fraction
+            halos[i,Fields.TOT_MASS] = total_mass
+            # print(f"    Thread {p.thread_num} finished Halo {i}")
     print("All halos parsed.")
-    return hd
+    return HaloData(num_halos, halos)
 
 
 def annotate_halos(hc, ds):

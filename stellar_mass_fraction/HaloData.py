@@ -39,13 +39,21 @@ class HaloData:
     halos = None
     num_halos = 0
 
-    def __init__(self, num_halos):
-        self.halos = np.zeros((num_halos, Fields.NUM_FIELDS))
+    def __init__(self, num_halos, data=None):
+        self.halos = data if data is not None else np.zeros((num_halos, Fields.NUM_FIELDS))
         self.num_halos = num_halos
 
-
-    def load_from_file(self, infile):
+    def check_version(infile):
         pass
+    
+    def load_from_file(infile):
+        HaloData.check_version(infile)
+        
+        data = np.genfromtxt(infile, skip_header=2)
+
+        return HaloData(np.shape(data)[0], data )
+
+    
 
     def save_to_file(self, outfile):
         print(f"Writing to file: {outfile}...")

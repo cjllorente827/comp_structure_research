@@ -4,8 +4,8 @@
 # STEP 0
 # Decide how much work we need to do
 # MODE=1 #Create halo catalog, extract data from catalog, make plots
-# MODE=2 #Skip the halo catalog creation
-MODE=3 #Skip the halo catalog creation and data extraction (plots only)
+MODE=2 #Skip the halo catalog creation
+#MODE=3 #Skip the halo catalog creation and data extraction (plots only)
 
 # Parallel process settings
 NPROCS=4
