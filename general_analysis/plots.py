@@ -4,9 +4,21 @@ import numpy as np
 import matplotlib.pyplot as plt
 from HaloData import *
 
+PLOT_DIR = "plots"
 
-def stellar_mass_fraction_scatter(fname):
-    hd = HaloData.load_from_file(fname)
+def density_projection(ds):
+    global PLOT_DIR
+    
+    plot = yt.SlicePlot(ds, 'x', "density")
+    plot.display(f"{PLOT_DIR}/{ds.basename}_density.png")
+
+def density_weighted_projection(dataset_fname):
+    #global PLOT_DIR
+    pass
+
+def stellar_mass_fraction_scatter(halo_dat_fname):
+    global PLOT_DIR
+    hd = HaloData.load_from_file(halo_dat_fname)
 
     fig, ax = plt.subplots(1,1,figsize=(7,7))
 
@@ -16,11 +28,13 @@ def stellar_mass_fraction_scatter(fname):
     ax.set_ylim(top=1.)
     ax.set_ylabel("$M_{*}/(\Omega_b/\Omega_m)/M_{vir}$")
 
+    plt.show()
     #plt.savefig("stellar_mass_fraction_bigbox.png")
 
-def main(dataset_fname, halo_dat_fname):
+def main(dataset, halo_dat_fname):
     stellar_mass_fraction_scatter(halo_dat_fname)
-    plt.show()
+    density_projection(dataset)
+    
 
 
 if __name__ == "__main__":
@@ -40,8 +54,11 @@ Usage:
         print("Running in test mode")
         dataset_fname  = "test_data/RD0009/RD0009"
         halo_dat_fname = "test_data/halo_test.dat"
+        PLOT_DIR       = "test_plots"
     else:
         dataset_fname  = sys.argv[1]
         halo_dat_fname = sys.argv[2]
+
+    dataset = yt.load(dataset_fname)
         
-    main(dataset_fname, halo_dat_fname)
+    main(dataset, halo_dat_fname)
