@@ -4,6 +4,8 @@
 
 ## TODO:
 1) Create weighted projections of halo density that inform us as to what we're seeing in the simulations. Do so in a way that allows easy modification (CLI arguments) for creating more kinds of plots.
+   - Stellar mass fraction, reducible version in jupyter notebook -> reduced version
+   - Stellar mass histogram
    - No weight
    - Density Weighted
    - Temperature weighted
