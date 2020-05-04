@@ -1,6 +1,9 @@
-*.dat
 *.out
-*.png
+*.gz
+*.tar
+**/catalogs/*
 */halo_catalogs/*
 */rockstar_halos/*
+halo_catalogs/*
+rockstar_halos/*
 *__pycache__*

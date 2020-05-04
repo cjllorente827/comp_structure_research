@@ -3,16 +3,17 @@
 ##########################################
 # STEP 0
 # Decide how much work we need to do
-# MODE=1 #Create halo catalog, extract data from catalog, make plots
+#MODE=1 #Create halo catalog, extract data from catalog, make plots
 MODE=2 #Skip the halo catalog creation
 #MODE=3 #Skip the halo catalog creation and data extraction (plots only)
 
-# Parallel process settings
-NPROCS=4
+# Parallel settings
+NPROCS=28 #rockstar uses MPI
+export OMP_NUM_THREADS=28 # the data extraction from the halo catalog uses pymp threading
 
 # File I/O settings
-INFILE="$HOME/FOGGIE_analysis/FOGGIE_data/RD0036/RD0036"
-OUTFILE="stellar_mass_fraction_z0.3.dat"
+INFILE="$HOME/cosmo_bigbox/25Mpc_512/RD0234/RD0234"
+OUTFILE="bigbox_halodata_z_0.25.dat"
 
 ##########################################
 

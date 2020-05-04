@@ -16,4 +16,5 @@ ax.set_xlabel("$M_{tot}$  ($M_{\odot}$)")
 ax.set_ylim(top=1.)
 ax.set_ylabel("$M_{*}/(\Omega_b/\Omega_m)/M_{vir}$")
 
-plt.show()
+#plt.show()
+plt.savefig("stellar_mass_fraction_bigbox.png")
