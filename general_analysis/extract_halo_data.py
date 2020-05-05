@@ -38,6 +38,7 @@ def extract_data_to_dat_file(hc, ds, outfile):
             sphere = ds.sphere(halo_pos, radius)
             totals = sphere.quantities.total_mass().in_units('Msun').value
             stellar_mass = sphere[('stars', 'particle_mass')].sum().in_units('Msun').value
+            num_star_particles = len(sphere[('stars', 'particle_mass')])
 
             omega_b = 0.0486
             omega_c = 0.2589
@@ -48,7 +49,10 @@ def extract_data_to_dat_file(hc, ds, outfile):
             total_mass = np.sum(totals)
             dm_mass = total_mass - gas_mass - stellar_mass
             baryon_mass = gas_mass + stellar_mass
-            str_mass_fraction = stellar_mass / baryonic_mass_fraction / total_mass
+            if total_mass == 0.:
+                str_mass_fraction = 0.
+            else:
+                str_mass_fraction = stellar_mass / baryonic_mass_fraction / total_mass
 
             halos[i,Fields.HALO_ID] = halo['particle_identifier']
             halos[i,Fields.RADIUS] = radius.value
@@ -61,6 +65,7 @@ def extract_data_to_dat_file(hc, ds, outfile):
             halos[i,Fields.DM_MASS] = dm_mass
             halos[i,Fields.STR_MASS_FRAC] = str_mass_fraction
             halos[i,Fields.TOT_MASS] = total_mass
+            halos[i,Fields.NUM_STAR_PARTICLES] = num_star_particles
             # print(f"    Thread {p.thread_num} finished Halo {i}")
     print("All halos parsed.")
     return HaloData(num_halos, halos)

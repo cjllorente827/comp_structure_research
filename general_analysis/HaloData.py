@@ -13,10 +13,11 @@ class Fields:
     STR_MASS_FRAC    = 8
     DM_MASS          = 9
     TOT_MASS         = 10
+    NUM_STAR_PARTICLES = 11
     
-    NUM_FIELDS       = 11
+    NUM_FIELDS       = 12
 
-    FIELD_LIST_VERSION = 1
+    FIELD_LIST_VERSION = 1.1
 
     # Field names
     names = [
@@ -30,7 +31,8 @@ class Fields:
         "Gas Mass",
         "Stellar Mass Fraction",
         "Dark Matter Mass",
-        "Total Mass"
+        "Total Mass",
+        "Star Particles"
     ]
 
     
@@ -70,3 +72,19 @@ class HaloData:
         with open(outfile, "w+") as f:
             f.write(header + data_string)
         print("Done")
+
+
+def filter_by(hd, field, filter_func, value):
+
+    filtered_indices = []
+    for i in range(0, len(hd.num_halos)):
+        if filter_func(hd.halos[i,field], value):
+            filtered_indices.append(i)
+
+    N = len(filtered_indices)
+    filtered = HaloData(N)
+    for i in range(0,N):
+        for j in range(0,NUM_FIELDS):
+            filtered.halos[i,j] = hd.halos[filtered_indices[i],j]
+    return filtered
+        
