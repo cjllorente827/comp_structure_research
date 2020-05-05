@@ -13,10 +13,11 @@ class Fields:
     STR_MASS_FRAC    = 8
     DM_MASS          = 9
     TOT_MASS         = 10
+    NUM_STAR_PARTICLES = 11
     
-    NUM_FIELDS       = 11
+    NUM_FIELDS       = 12
 
-    FIELD_LIST_VERSION = 1
+    FIELD_LIST_VERSION = 1.1
 
     # Field names
     names = [
@@ -30,7 +31,8 @@ class Fields:
         "Gas Mass",
         "Stellar Mass Fraction",
         "Dark Matter Mass",
-        "Total Mass"
+        "Total Mass",
+        "Star Particles"
     ]
 
     
