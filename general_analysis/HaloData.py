@@ -77,14 +77,14 @@ class HaloData:
 def filter_by(hd, field, filter_func, value):
 
     filtered_indices = []
-    for i in range(0, len(hd.num_halos)):
+    for i in range(0, hd.num_halos):
         if filter_func(hd.halos[i,field], value):
             filtered_indices.append(i)
 
     N = len(filtered_indices)
     filtered = HaloData(N)
     for i in range(0,N):
-        for j in range(0,NUM_FIELDS):
+        for j in range(0,Fields.NUM_FIELDS):
             filtered.halos[i,j] = hd.halos[filtered_indices[i],j]
     return filtered
         
