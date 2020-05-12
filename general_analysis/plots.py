@@ -151,7 +151,7 @@ def stellar_mass_fraction_scatter_multi(hd):
     fig.suptitle("Stellar Mass Fraction with different cutoffs")
     plt.show()
 
-def stellar_mass_fraction_reduced(hd, cutoff=1):
+def stellar_mass_fraction_reduced(hd, behroozi_data, cutoff=1):
 
     filter_func = lambda val, cut: val > cut
     filtered_halos = filter_by(hd, Fields.NUM_STAR_PARTICLES, filter_func, cutoff)
@@ -167,6 +167,7 @@ def stellar_mass_fraction_reduced(hd, cutoff=1):
     maxlen = np.max(hist)+1 # have an extra slot at the end for safety
     smf_data_bins = np.zeros((nbins, maxlen))
     smf_median    = np.zeros(nbins)
+    smf_mean    = np.zeros(nbins)
     smf_max       = np.zeros(nbins)
     smf_min       = np.zeros(nbins)
     smf_count     = np.zeros(nbins)
@@ -184,6 +185,7 @@ def stellar_mass_fraction_reduced(hd, cutoff=1):
 
         if count > 0:
             smf_median[i] = np.median(smf_data_bins[i,:count])        
+            smf_mean[i] = np.mean(smf_data_bins[i,:count])        
             smf_max[i] = np.max(smf_data_bins[i,:count])
             smf_min[i] = np.min(smf_data_bins[i,:count])
             smf_count[i] = count
@@ -191,6 +193,7 @@ def stellar_mass_fraction_reduced(hd, cutoff=1):
 
     # some data cleanup, replaces zero values with nan so they are not plotted
     smf_median[ smf_median==0. ] = np.nan
+    smf_mean[ smf_mean==0. ] = np.nan
     smf_max[ smf_max==0. ] = np.nan
     smf_min[ smf_min==0. ] = np.nan
 
@@ -202,22 +205,41 @@ def stellar_mass_fraction_reduced(hd, cutoff=1):
     ax[1].set_yscale('log')
     ax[1].set_xscale('log')
 
-    ax[1].loglog(logbins[:nbins], smf_median)
-    ax[1].fill_between(logbins[:nbins], smf_max, smf_min, alpha=0.15)
-    
-    ax[1].set_ylabel("$M_{*}/(\Omega_b/\Omega_m)/M_{vir}$")
+    # correcting for the way Behroozi calculates stellar mass fraction
+    #smf_correction = 1.
+    smf_correction = (0.0486)/(0.0486 + 0.2589)
 
+    ax[1].loglog(logbins[:nbins], smf_median*smf_correction)
+    ax[1].loglog(logbins[:nbins], smf_mean*smf_correction)
+    ax[1].fill_between(logbins[:nbins], smf_max*smf_correction, smf_min*smf_correction,\
+                       alpha=0.15)
+    
     im = ax[2].scatter(filtered_halos.halos[:,Fields.TOT_MASS],\
-                       filtered_halos.halos[:,Fields.STR_MASS_FRAC],\
+                       filtered_halos.halos[:,Fields.STR_MASS_FRAC]*smf_correction,\
                        marker='.', alpha=0.15, c='steelblue')
     
+    ax[2].loglog(logbins[:nbins], smf_median*smf_correction, label='Median')
+    ax[2].loglog(logbins[:nbins], smf_mean*smf_correction, label='Mean')
+    ax[2].fill_between(logbins[:nbins], smf_max*smf_correction, smf_min*smf_correction,\
+                       alpha=0.15)
+
+    ax[1].set_ylabel("$M_{*}/M_h$")
     ax[2].set_xlabel("$M_{tot}$  ($M_{\odot}$)")
-    ax[2].loglog(logbins[:nbins], smf_median)
-    ax[2].fill_between(logbins[:nbins], smf_max, smf_min, alpha=0.15)
-    #ax[2].set_ylim(top=10., bottom=1e-5)
-    ax[2].set_ylabel("$M_{*}/(\Omega_b/\Omega_m)/M_{vir}$")
+    ax[2].set_ylabel("$M_{*}/M_h$")
 
     #plt.subplots_adjust(left=0.1, bottom=0.1, right=0.99, top=0.9)
+
+    halo_mass, smf, err_up, err_dn = np.loadtxt(behroozi_data, unpack=True)
+    smf = 10**(smf)
+    halo_mass = 10**(halo_mass)
+    ax[1].loglog(halo_mass, smf, c='green')
+    ax[2].loglog(halo_mass, smf, c='green', label='Behroozi 2013')
+
+    ax[1].set_xlim((1e9, 2e13))
+    ax[1].set_ylim((1e-4, 2))
+    ax[2].set_xlim((1e9, 2e13))
+    ax[2].set_ylim((1e-4, 2))
+    ax[2].legend()
     
     plt.show()
     
