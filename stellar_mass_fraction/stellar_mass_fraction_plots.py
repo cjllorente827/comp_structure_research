@@ -33,8 +33,12 @@ def stellar_mass_fraction_scatter(hd, cutoff=1):
     
     fig, ax = plt.subplots(1,1,figsize=(7,7))
 
+    # correcting for the way Behroozi calculates stellar mass fraction
+    #smf_correction = 1.
+    smf_correction = (0.0486)/(0.0486 + 0.2589)
+
     im = ax.scatter(filtered_halos.halos[:,Fields.TOT_MASS],\
-              filtered_halos.halos[:,Fields.STR_MASS_FRAC],\
+              filtered_halos.halos[:,Fields.STR_MASS_FRAC]*smf_correction,\
               c=filtered_halos.halos[:,Fields.NUM_STAR_PARTICLES],\
                     marker='o', cmap='viridis', norm=matplotlib.colors.LogNorm())
     ax.set_title("Stellar Mass Fraction")
@@ -56,6 +60,10 @@ def stellar_mass_fraction_scatter_multi(hd):
     
     cutoffs = [0,1,10,100]
     N = len(cutoffs)
+
+    # correcting for the way Behroozi calculates stellar mass fraction
+    #smf_correction = 1.
+    smf_correction = (0.0486)/(0.0486 + 0.2589)
     
     fig, axes = plt.subplots(1,N,figsize=(N*HEIGHT,HEIGHT), sharey='row',\
                              gridspec_kw={'hspace':0, 'wspace':0})
@@ -73,7 +81,7 @@ def stellar_mass_fraction_scatter_multi(hd):
         filtered_halos = filter_by(hd, Fields.NUM_STAR_PARTICLES, filter_func, cutoff)
     
         im = ax.scatter(filtered_halos.halos[:,Fields.TOT_MASS],\
-              filtered_halos.halos[:,Fields.STR_MASS_FRAC],\
+              filtered_halos.halos[:,Fields.STR_MASS_FRAC]*smf_correction,\
               c=filtered_halos.halos[:,Fields.NUM_STAR_PARTICLES],\
                         marker='.', cmap='viridis', norm=norm)
 
