@@ -1,0 +1,18 @@
+#!/bin/bash -login
+ 
+#SBATCH --time=08:00:00             
+#SBATCH --nodes=1                 
+#SBATCH --ntasks=9                  
+#SBATCH --cpus-per-task=1
+#SBATCH --mem-per-cpu=10G            
+#SBATCH --job-name jupyter-session
+ 
+unset XDG_RUNTIME_DIR
+
+# this is how I enable my local python environment
+export PATH=/mnt/home/llorente/yt-conda/bin:$PATH
+
+# alternatively start a jupyter notebook by replacing jupyter-lab with jupyter-notebook
+# 48823 is the port where your jupyter session will listen, feel free to pick a different 5 digit number below 65535
+# we will call this port the "remote port"
+jupyter-lab --ip='*' --port=20159 --no-browser

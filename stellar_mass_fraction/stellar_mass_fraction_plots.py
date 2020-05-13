@@ -43,11 +43,11 @@ def stellar_mass_fraction_scatter(hd, cutoff=1):
                     marker='o', cmap='viridis', norm=matplotlib.colors.LogNorm())
     ax.set_title("Stellar Mass Fraction")
     ax.set_xlabel("$M_{tot}$  ($M_{\odot}$)")
-    ax.set_ylim(top=10., bottom=1e-5)
+    ax.set_ylim(top=2., bottom=1e-6)
     ax.set_yscale('log')
     ax.set_xscale('log')
     
-    ax.set_ylabel("$M_{*}/(\Omega_b/\Omega_m)/M_{vir}$")
+    ax.set_ylabel("$M_{*}/M_{vir}$")
 
     fig.colorbar(im, ax=ax)
     plt.show()
@@ -95,8 +95,8 @@ def stellar_mass_fraction_scatter_multi(hd):
         ax.set_xscale('log')
         ax.tick_params(direction='in', which='both')
     
-    axes[0].set_ylim(top=10., bottom=1e-5)
-    axes[0].set_ylabel("$M_{*}/(\Omega_b/\Omega_m)/M_{vir}$")
+    axes[0].set_ylim(top=2., bottom=1e-6)
+    axes[0].set_ylabel("$M_{*}/M_{vir}$")
 
     fig.colorbar(im, ax=axes[-1])
     fig.suptitle("Stellar Mass Fraction with different cutoffs")

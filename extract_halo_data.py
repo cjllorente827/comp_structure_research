@@ -71,55 +71,11 @@ def extract_data_to_dat_file(hc, ds, outfile):
     return HaloData(num_halos, halos)
 
 
-def annotate_halos(hc, ds):
-    fig = plt.figure()
-    grid = AxesGrid(fig, (0.1,0.1,0.9,0.9),
-                nrows_ncols = (1, 2),
-                axes_pad = 0.05,
-                label_mode = "1",
-                share_all = True,
-                cbar_location="right",
-                cbar_mode="single",
-                # cbar_size="3%",
-                cbar_pad="0%")
-    
-    left_edge  = [0.488794, 0.473535, 0.505703]
-    right_edge = [0.492794, 0.477535, 0.509703]
-    must_refine_region = ds.box(left_edge, right_edge)
-    proj = yt.ProjectionPlot(ds, "z", "density", data_source=must_refine_region, width=(0.4,'Mpc'))
-    part = yt.ParticlePlot(ds, 'particle_position_x', 'particle_position_y',
-                           color='k',data_source=must_refine_region, width=(0.4,'Mpc'))
-    max_rad = 0.
-    max_pos = [0.,0.]
-    for halo in tqdm(hc.catalog):
-        rad = halo['virial_radius'].in_units('kpc').value
-        if rad > max_rad:
-            max_rad = rad
-            max_pos[0] = float(halo['particle_position_x'].to('Mpc').value)
-            max_pos[1] = float(halo['particle_position_y'].to('Mpc').value)
-        halo_pos = [halo['particle_position_x'],
-                    halo['particle_position_y'],
-                    halo['particle_position_z']]
-        proj.annotate_sphere(halo_pos, radius=(rad, 'kpc'), coord_system='data')
-        part.annotate_sphere(halo_pos, radius=(rad, 'kpc'), coord_system='data')
-
-    print(max_pos)
-    proj.set_center(max_pos, unit='Mpc')
-    proj.annotate_timestamp(redshift=True)
-    proj.annotate_scale()
-    proj.set_log('density', True)
-    proj.save("density")
-
-    part.set_center(max_pos, unit='Mpc')
-    part.save("particles")
-
-
-
-def main(infile, outfile):
-        print(f"Reading from {infile}")
-        ds = yt.load(infile)
+def main(enzo_in, rockstar_in, outfile):
+        print(f"Reading from {enzo_in}")
+        ds = yt.load(enzo_in)
         ds.add_particle_filter('stars')
-        hds = yt.load("rockstar_halos/halos_0.0.bin")
+        hds = yt.load(rockstar_in)
 
         hc = HaloCatalog(data_ds=ds, halos_ds=hds)
         hc.load()
@@ -133,9 +89,17 @@ def main(infile, outfile):
 
 if __name__ == "__main__":
 
-    infile = sys.argv[1]
-    outfile = sys.argv[2]
+    argc = len(sys.argv)
 
-    main(infile, outfile)
+    if argc != 4:
+        print("""
+Usage: python extract_halo_data.py <enzo_output> <rockstar_catalog/halos_0.0.bin> <output_filename>
+""")
+    
+    enzo_in     = sys.argv[1]
+    rockstar_in = sys.argv[2]
+    outfile     = sys.argv[3]
+
+    main(enzo_in, rockstar_in, outfile)
 
     
