@@ -9,6 +9,7 @@ from mpl_toolkits.axes_grid1 import AxesGrid
 from tqdm import tqdm
 
 matplotlib.rcParams.update({'font.size': 16})
+matplotlib.rcParams.update({"figure.facecolor": 'FFFFFF'})
 
 def halo_mass_histogram(hd, cutoff=0):
     #filter by number of star particles
