@@ -40,7 +40,7 @@ def stellar_mass_fraction_scatter(hd, cutoff=1):
     im = ax.scatter(filtered_halos.halos[:,Fields.TOT_MASS],\
               filtered_halos.halos[:,Fields.STR_MASS_FRAC]*smf_correction,\
               c=filtered_halos.halos[:,Fields.NUM_STAR_PARTICLES],\
-                    marker='o', cmap='viridis', norm=matplotlib.colors.LogNorm())
+                    marker='.', cmap='viridis', norm=matplotlib.colors.LogNorm())
     ax.set_title("Stellar Mass Fraction")
     ax.set_xlabel("$M_{tot}$  ($M_{\odot}$)")
     ax.set_ylim(top=2., bottom=1e-6)
@@ -53,7 +53,7 @@ def stellar_mass_fraction_scatter(hd, cutoff=1):
     plt.show()
     #plt.savefig("stellar_mass_fraction_bigbox.png")
 
-def stellar_mass_fraction_scatter_multi(hd):
+def stellar_mass_fraction_scatter_multi(hd, halo_mass_filter=None):
     global PLOT_DIR
 
     HEIGHT = 6
@@ -79,6 +79,10 @@ def stellar_mass_fraction_scatter_multi(hd):
         #filter by number of star particles
         filter_func = lambda val, cut: val > cut
         filtered_halos = filter_by(hd, Fields.NUM_STAR_PARTICLES, filter_func, cutoff)
+
+        #filter by halo mass
+        if halo_mass_filter is not None:
+            filtered_halos = filter_by(filtered_halos, Fields.TOT_MASS, filter_func, halo_mass_filter)
     
         im = ax.scatter(filtered_halos.halos[:,Fields.TOT_MASS],\
               filtered_halos.halos[:,Fields.STR_MASS_FRAC]*smf_correction,\
@@ -102,10 +106,14 @@ def stellar_mass_fraction_scatter_multi(hd):
     fig.suptitle("Stellar Mass Fraction with different cutoffs")
     plt.show()
 
-def stellar_mass_fraction_reduced(hd, behroozi_data, cutoff=1):
+def stellar_mass_fraction_reduced(hd, behroozi_data, cutoff=1, halo_mass_filter=None):
 
     filter_func = lambda val, cut: val > cut
     filtered_halos = filter_by(hd, Fields.NUM_STAR_PARTICLES, filter_func, cutoff)
+
+    #filter by halo mass
+    if halo_mass_filter is not None:
+        filtered_halos = filter_by(filtered_halos, Fields.TOT_MASS, filter_func, halo_mass_filter)
 
     nbins = int(np.sqrt(filtered_halos.num_halos))
     
@@ -160,8 +168,8 @@ def stellar_mass_fraction_reduced(hd, behroozi_data, cutoff=1):
     #smf_correction = 1.
     smf_correction = (0.0486)/(0.0486 + 0.2589)
 
-    ax[1].loglog(logbins[:nbins], smf_median*smf_correction)
-    ax[1].loglog(logbins[:nbins], smf_mean*smf_correction)
+    ax[1].loglog(logbins[:nbins], smf_median*smf_correction, label='Median')
+    ax[1].loglog(logbins[:nbins], smf_mean*smf_correction, label='Mean')
     ax[1].fill_between(logbins[:nbins], smf_max*smf_correction, smf_min*smf_correction,\
                        alpha=0.15)
     
@@ -169,8 +177,8 @@ def stellar_mass_fraction_reduced(hd, behroozi_data, cutoff=1):
                        filtered_halos.halos[:,Fields.STR_MASS_FRAC]*smf_correction,\
                        marker='.', alpha=0.15, c='steelblue')
     
-    ax[2].loglog(logbins[:nbins], smf_median*smf_correction, label='Median')
-    ax[2].loglog(logbins[:nbins], smf_mean*smf_correction, label='Mean')
+    ax[2].loglog(logbins[:nbins], smf_median*smf_correction)
+    ax[2].loglog(logbins[:nbins], smf_mean*smf_correction)
     ax[2].fill_between(logbins[:nbins], smf_max*smf_correction, smf_min*smf_correction,\
                        alpha=0.15)
 
@@ -183,13 +191,20 @@ def stellar_mass_fraction_reduced(hd, behroozi_data, cutoff=1):
     halo_mass, smf, err_up, err_dn = np.loadtxt(behroozi_data, unpack=True)
     smf = 10**(smf)
     halo_mass = 10**(halo_mass)
-    ax[1].loglog(halo_mass, smf, c='green')
-    ax[2].loglog(halo_mass, smf, c='green', label='Behroozi 2013')
+    ax[1].loglog(halo_mass, smf, c='green', label='Behroozi 2013')
+    ax[2].loglog(halo_mass, smf, c='green')
 
-    ax[1].set_xlim((1e9, 2e13))
+
     ax[1].set_ylim((1e-4, 2))
-    ax[2].set_xlim((1e9, 2e13))
+    ax[1].legend()
+
+    if halo_mass_filter is not None:
+        ax[1].set_xlim((halo_mass_filter, 2e13))
+        ax[2].set_xlim((halo_mass_filter, 2e13))
+    else:
+        ax[1].set_xlim((1e9, 2e13))
+        ax[2].set_xlim((1e9, 2e13))
+        
     ax[2].set_ylim((1e-4, 2))
-    ax[2].legend()
     
     plt.show()

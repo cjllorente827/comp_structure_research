@@ -1,4 +1,12 @@
 import sys
+
+argc = len(sys.argv)
+
+if argc != 3:
+    print(f"\n\tUsage: python {sys.argv[0]} <enzo_dataset> <output_dir>\n")
+    sys.exit()
+
+import gc
 import yt
 yt.enable_parallelism()
 
@@ -33,36 +41,31 @@ yt.enable_parallelism()
 #     return proj
 
 if __name__ == '__main__':
-    argc = len(sys.argv)
 
-    if argc != 3:
-        print("""
-Usage: python plots.py <enzo_dataset> <output_dir>
-""")
-    
     enzo_in     = sys.argv[1]
     output_dir  = sys.argv[2]
 
     ds = yt.load(enzo_in)
 
-    density = yt.ProjectionPlot(ds, 'x', "density")
+    # 1st: field to project, 2nd: field to weight by, 3rd: colormap to use
+    field_list = [
+        ("density", None, "viridis"),
+        ("temperature", None, "plasma"),
+        ("metallicity", None, "dusk"),
+        ("density", "temperature", "plasma"),
+        ("density", "metallicity", "dusk"),
+        ]
 
-    density_w_temp = yt.ProjectionPlot(ds, 'x', "density", weight_field='temperature')
-    density_w_metal = yt.ProjectionPlot(ds, 'x', "density", weight_field='metallicity')
-
-    temperature = yt.ProjectionPlot(ds, 'x', "temperature")
-
-    metallicity = yt.ProjectionPlot(ds, 'x', "metallicity")
-
-    all_plots = [
-        density,
-        density_w_temp,
-        density_w_metal,
-        temperature,
-        metallicity,
-    ]
-
-    for plot in all_plots:
+    for f in field_list:
+        #our boy uses a lot of fucking memory for these plots
+        gc.collect()
+        
+        field  = f[0]
+        weight = f[1]
+        cmap   = f[2]
+        plot = yt.ProjectionPlot(ds, 'x', field, weight_field=weight)
         plot.annotate_timestamp(corner='upper_left', redshift=True)
         plot.annotate_scale(corner='upper_right')
+        plot.set_cmap(field, cmap=cmap)
         plot.save(output_dir)
+
