@@ -9,6 +9,7 @@ from mpl_toolkits.axes_grid1 import AxesGrid
 from tqdm import tqdm
 
 matplotlib.rcParams.update({'font.size': 16})
+matplotlib.rcParams.update({"figure.facecolor": 'FFFFFF'})
 
 def halo_mass_histogram(hd, cutoff=0):
     #filter by number of star particles
@@ -208,3 +209,23 @@ def stellar_mass_fraction_reduced(hd, behroozi_data, cutoff=1, halo_mass_filter=
     ax[2].set_ylim((1e-4, 2))
     
     plt.show()
+
+
+def Tumlinson_2017_baryon_frac(hd):
+    
+    fig, ax = plt.subplots(1,1,figsize=(7,7))
+
+    omega_frac = (0.0486)/(0.0486 + 0.2589)
+    avg_baryon_frac = (omega_frac*hd.halos[:,Fields.TOT_MASS])
+    gas_mass_frac = hd.halos[:,Fields.GAS_MASS] / avg_baryon_frac
+
+    gas_star_frac = hd.halos[:,Fields.STR_MASS_FRAC] + gas_mass_frac
+    bary_mass_frac = hd.halos[:,Fields.BAR_MASS] / avg_baryon_frac 
+
+    ax.plot(hd.halos[:,Fields.STR_MASS], hd.halos[:,Fields.STR_MASS_FRAC], label='Stars')
+    ax.plot(hd.halos[:,Fields.STR_MASS], gas_mass_frac, label='Gas')
+    ax.plot(hd.halos[:,Fields.STR_MASS], bary_mass_frac, label='Baryons')
+    ax.plot(hd.halos[:,Fields.STR_MASS], gas_star_frac, label='Gas+stars')
+
+    ax.set_xscale('log')
+    ax.legend()
