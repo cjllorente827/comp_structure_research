@@ -10,6 +10,7 @@ from tqdm import tqdm
 
 matplotlib.rcParams.update({'font.size': 16})
 matplotlib.rcParams.update({"figure.facecolor": 'FFFFFF'})
+np.set_printoptions(threshold=sys.maxsize)
 
 def halo_mass_histogram(hd, cutoff=0):
     #filter by number of star particles
@@ -123,7 +124,6 @@ def stellar_mass_fraction_reduced(hd, behroozi_data, cutoff=1, halo_mass_filter=
     logbins = np.logspace(np.log10(bins[0]),np.log10(bins[-1]),len(bins))
     hist, null = np.histogram(data, bins=logbins)
     
-    #nbins = len(logbins)-1
     maxlen = np.max(hist)+1 # have an extra slot at the end for safety
     smf_data_bins = np.zeros((nbins, maxlen))
     smf_median    = np.zeros(nbins)
@@ -211,21 +211,33 @@ def stellar_mass_fraction_reduced(hd, behroozi_data, cutoff=1, halo_mass_filter=
     plt.show()
 
 
-def Tumlinson_2017_baryon_frac(hd):
+def baryon_frac(hd):
     
-    fig, ax = plt.subplots(1,1,figsize=(7,7))
+    filter_func = lambda val, cut: val > cut
+    filtered_halos = filter_by(hd, Fields.NUM_STAR_PARTICLES, filter_func, 0)
+
+    print(f"No. of star-forming halos: {filtered_halos.num_halos}")
+    
+    fig, ax = plt.subplots(1,1,figsize=(14,7))
 
     omega_frac = (0.0486)/(0.0486 + 0.2589)
-    avg_baryon_frac = (omega_frac*hd.halos[:,Fields.TOT_MASS])
-    gas_mass_frac = hd.halos[:,Fields.GAS_MASS] / avg_baryon_frac
+    avg_baryon_frac = (omega_frac*filtered_halos.halos[:,Fields.TOT_MASS])
+    gas_mass_frac = filtered_halos.halos[:,Fields.GAS_MASS] / avg_baryon_frac
+    bary_mass_frac = filtered_halos.halos[:,Fields.BAR_MASS] / avg_baryon_frac 
+    
+    ax.scatter(filtered_halos.halos[:,Fields.STR_MASS], filtered_halos.halos[:,Fields.STR_MASS_FRAC], label='Stars', marker='.')
+    ax.scatter(filtered_halos.halos[:,Fields.STR_MASS], gas_mass_frac, label='Gas', marker='.')
+    #ax.scatter(filtered_halos.halos[:,Fields.STR_MASS], bary_mass_frac, label='Baryons', marker='.')
 
-    gas_star_frac = hd.halos[:,Fields.STR_MASS_FRAC] + gas_mass_frac
-    bary_mass_frac = hd.halos[:,Fields.BAR_MASS] / avg_baryon_frac 
-
-    ax.plot(hd.halos[:,Fields.STR_MASS], hd.halos[:,Fields.STR_MASS_FRAC], label='Stars')
-    ax.plot(hd.halos[:,Fields.STR_MASS], gas_mass_frac, label='Gas')
-    ax.plot(hd.halos[:,Fields.STR_MASS], bary_mass_frac, label='Baryons')
-    ax.plot(hd.halos[:,Fields.STR_MASS], gas_star_frac, label='Gas+stars')
+    # obs_gas_frac = 10**( -0.48*np.log10(filtered_halos.halos[:,Fields.STR_MASS])+4.39 )
+    # ax.plot(obs_gas_frac)
 
     ax.set_xscale('log')
     ax.legend()
+
+    ax.set_ylabel("Mass fraction $(M/(\Omega_b/\Omega_m)/M_h )$")
+    ax.set_xlabel("$M_* (M_{\odot})$")
+    plt.show()
+
+
+    
