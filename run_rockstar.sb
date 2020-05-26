@@ -1,0 +1,40 @@
+#!/bin/bash
+#SBATCH --time=01:30:00
+#SBATCH --job-name=rockstar
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=8
+#SBATCH --mem=128G
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=llorente@msu.edu
+
+cd $SLURM_SUBMIT_DIR 
+
+module purge
+module load OpenMPI HDF5/1.10.1
+
+[ ! -d rockstar_halos ] && mkdir rockstar_halos
+[ -f rockstar_halos/auto-rockstar.cfg ] && rm -v rockstar_halos/auto-rockstar.cfg
+if [ -f rockstar_halos/restart.cfg ]; then
+    cfg=rockstar_halos/restart.cfg
+    for i in `seq 0 100`; do
+	newc=`echo $i | gawk '{printf "client%3.3d.out", $1}'`
+	news=`echo $i | gawk '{printf "server%3.3d.out", $1}'`
+	if [ ! -f $newc ]; then
+	    cp -v client.out $newc
+	    cp -v server.out $news
+	    break
+	fi
+    done
+else
+    cfg=rockstar.cfg
+    [ -f client.out ] && rm -v client*.out
+    [ -f server.out ] && rm -v server*.out
+fi
+
+./rockstar-galaxies -c $cfg >& server.out&
+while [ ! -e rockstar_halos/auto-rockstar.cfg ]; do
+    sleep 1
+done
+mpirun --mca btl ^tcp --oversubscribe -n $SLURM_NTASKS ./rockstar-galaxies -c rockstar_halos/auto-rockstar.cfg >& client.out
+
+exit 0

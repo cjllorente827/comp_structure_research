@@ -1,0 +1,51 @@
+#!/bin/bash
+#SBATCH --time=10:00:00
+#SBATCH --job-name=rockstar
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=8
+#SBATCH --mem=128G
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=llorente@msu.edu
+
+cd /mnt/home/llorente/comp_structure_research/stellar_mass_fraction/bigbox_25Mpc
+
+module purge
+module load GNU/6.4.0-2.28  OpenMPI/2.1.2 HDF5/1.10.1
+
+export PATH=$PATH:/mnt/home/llorente/rockstar-galaxies
+
+[ ! -d rockstar_halos ] && mkdir rockstar_halos
+[ -f rockstar_halos/auto-rockstar.cfg ] && rm -v auto-rockstar.cfg
+
+if [ -f rockstar_halos/restart.cfg ]; then
+    cfg=rockstar_halos/restart.cfg
+    for i in `seq 0 100`; do
+	newc=`echo $i | gawk '{printf "client%3.3d.out", $1}'`
+	news=`echo $i | gawk '{printf "server%3.3d.out", $1}'`
+	if [ ! -f $newc ]; then
+	    cp -v client.out $newc
+	    cp -v server.out $news
+	    break
+	fi
+    done
+else
+    echo "Using rockstar.cfg"
+    cfg=rockstar.cfg
+    [ -f client.out ] && rm -v client*.out
+    [ -f server.out ] && rm -v server*.out
+fi
+
+rockstar-galaxies -c $cfg &> server.out&
+
+echo "Starting wait..."
+while [ ! -e auto-rockstar.cfg ]; do
+    pwd
+    sleep 10
+done
+echo "Done waiting."
+
+mpirun --mca btl ^tcp --oversubscribe -n 8 rockstar-galaxies -c auto-rockstar.cfg
+
+#mpirun --mca btl ^tcp --oversubscribe -n $SLURM_N_TASKS rockstar-galaxies -c auto-rockstar.cfg >& client.out
+
+exit 0
