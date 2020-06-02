@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --time=10:00:00
+#SBATCH --time=1:30:00
 #SBATCH --job-name=rockstar
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=8
@@ -7,18 +7,34 @@
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=llorente@msu.edu
 
-cd /mnt/home/llorente/comp_structure_research/stellar_mass_fraction/bigbox_25Mpc
+ENZO_DIR=/mnt/home/llorente/cosmo_bigbox/25Mpc_512
+OUT_DIR=/mnt/home/llorente/comp_structure_research/stellar_mass_fraction/bigbox_25Mpc
+HALO_DIR=/mnt/home/llorente/comp_structure_research/stellar_mass_fraction/bigbox_25Mpc/rockstar_halos
+extract=/mnt/home/llorente/comp_structure_research/extract_halo_data.py
+cd $OUT_DIR
+
+if [ -z "$SLURM_NTASKS" ]
+then
+      NTASKS=8
+else
+      NTASKS=$SLURM_NTASKS
+fi
 
 module purge
 module load GNU/6.4.0-2.28  OpenMPI/2.1.2 HDF5/1.10.1
 
 export PATH=$PATH:/mnt/home/llorente/rockstar-galaxies
 
-[ ! -d rockstar_halos ] && mkdir rockstar_halos
-[ -f rockstar_halos/auto-rockstar.cfg ] && rm -v auto-rockstar.cfg
+autocfg=$HALO_DIR/auto-rockstar.cfg
+restartcfg=$HALO_DIR/restart.cfg
 
-if [ -f rockstar_halos/restart.cfg ]; then
-    cfg=rockstar_halos/restart.cfg
+[ ! -d $HALO_DIR ] && mkdir $HALO_DIR
+[ -f $autocfg ] && rm -v $autocfg
+
+rm -v $HALO_DIR/*
+
+if [ -f $restartcfg ]; then
+    cfg=$restartcfg
     for i in `seq 0 100`; do
 	newc=`echo $i | gawk '{printf "client%3.3d.out", $1}'`
 	news=`echo $i | gawk '{printf "server%3.3d.out", $1}'`
@@ -30,22 +46,33 @@ if [ -f rockstar_halos/restart.cfg ]; then
     done
 else
     echo "Using rockstar.cfg"
-    cfg=rockstar.cfg
+    cfg=$OUT_DIR/rockstar.cfg
     [ -f client.out ] && rm -v client*.out
     [ -f server.out ] && rm -v server*.out
 fi
 
-rockstar-galaxies -c $cfg &> server.out&
+cd $ENZO_DIR
+rockstar-galaxies -c $cfg &> $OUT_DIR/server.out&
 
-echo "Starting wait..."
-while [ ! -e auto-rockstar.cfg ]; do
-    pwd
-    sleep 10
+echo "Starting server..."
+echo "Looking for $autocfg"
+while [ ! -e $autocfg ]; do
+    sleep 1
+    echo "..."
 done
-echo "Done waiting."
+echo "Up and running."
 
-mpirun --mca btl ^tcp --oversubscribe -n 8 rockstar-galaxies -c auto-rockstar.cfg
+mpirun --mca btl ^tcp --oversubscribe -n $NTASKS rockstar-galaxies -c $autocfg >& $OUT_DIR/client.out
 
-#mpirun --mca btl ^tcp --oversubscribe -n $SLURM_N_TASKS rockstar-galaxies -c auto-rockstar.cfg >& client.out
+echo "Finished creating halo catalogs. Now performing data extraction."
+
+OUTPUTS="RD0111 RD0166 RD0265"
+
+export OMP_NUM_THREADS=$NTASKS
+
+for out in $OUTPUTS; do
+    python $extract $ENZO_DIR/$out/$out $HALO_DIR/halos_$out.0.bin $OUT_DIR/halodata_$out.dat
+done
+
 
 exit 0

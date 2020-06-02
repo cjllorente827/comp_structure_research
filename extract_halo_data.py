@@ -1,4 +1,14 @@
 import sys
+
+argc = len(sys.argv)
+
+if argc != 4:
+    print("""
+Usage: python extract_halo_data.py <enzo_output> <rockstar_catalog/halos_0.0.bin> <output_filename>
+""")
+    exit()
+
+
 import yt
 
 from tqdm import tqdm
@@ -89,12 +99,6 @@ def main(enzo_in, rockstar_in, outfile):
 
 if __name__ == "__main__":
 
-    argc = len(sys.argv)
-
-    if argc != 4:
-        print("""
-Usage: python extract_halo_data.py <enzo_output> <rockstar_catalog/halos_0.0.bin> <output_filename>
-""")
     
     enzo_in     = sys.argv[1]
     rockstar_in = sys.argv[2]

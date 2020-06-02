@@ -7,7 +7,7 @@ restart_snap = None  # filename of the first dataset in the restart
                      # (None for no restart; True to automatically find the output)
 rockstar_base_cfg = "rockstar_base.cfg"
 rockstar_cfg = "rockstar.cfg"
-outbase = "rockstar_halos"
+outbase = "/mnt/home/llorente/comp_structure_research/stellar_mass_fraction/bigbox_25Mpc/rockstar_halos"
 n_nodes = 1
 n_procs = 8
 n_readers = 8
@@ -66,7 +66,7 @@ lines = open(rockstar_base_cfg, "r").readlines()
 fp = open(rockstar_cfg, "w")
 for l in lines:
     fp.write(l)
-fp.write("OUTBASE = %s\n" % (outbase))
+fp.write("\nOUTBASE = %s\n" % (outbase))
 fp.write("NUM_BLOCKS = %d\n" % (n_readers))
 fp.write("NUM_WRITERS = %d\n" % (n_procs))
 fp.write("FORK_PROCESSORS_PER_MACHINE = %d\n" % (n_procs/n_nodes))

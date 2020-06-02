@@ -1,0 +1,25 @@
+#!/bin/bash
+#SBATCH --time=1:00:00
+#SBATCH --job-name=extract_halos
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=16
+#SBATCH --mem=128G
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=llorente@msu.edu
+
+ENZO_DIR=/mnt/home/llorente/cosmo_bigbox/25Mpc_512
+OUT_DIR=/mnt/home/llorente/comp_structure_research/stellar_mass_fraction/bigbox_25Mpc
+extract=/mnt/home/llorente/comp_structure_research/extract_halo_data.py
+HALO_DIR=$OUT_DIR/rockstar_halos
+cd $OUT_DIR
+
+OUTPUTS="RD0111 RD0166 RD0265"
+
+#export OMP_NUM_THREADS=$SLURM_NTASKS
+export OMP_NUM_THREADS=8
+
+for out in $OUTPUTS; do
+    python $extract $ENZO_DIR/$out/$out $HALO_DIR/halos_$out.0.bin $OUT_DIR/halodata_$out.dat
+done
+    
+
