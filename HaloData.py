@@ -59,10 +59,10 @@ class HaloData:
 
     def save_to_file(self, outfile):
         print(f"Writing to file: {outfile}...")
-        tabs = 20
+        tabs = 30
         header = f"Version: {Fields.FIELD_LIST_VERSION}\n"
         header += '\t'.join(Fields.names).expandtabs(tabs) + '\n'
-        format_str = '\t'.join(['%3d'] + ["%.3e"]*(Fields.NUM_FIELDS-1)) + '\n'
+        format_str = '\t'.join(['%3d'] + ["%.10e"]*(Fields.NUM_FIELDS-1)) + '\n'
 
         data_string = ''
         for i in range(0, self.num_halos):

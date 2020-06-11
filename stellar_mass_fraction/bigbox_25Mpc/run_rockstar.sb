@@ -70,6 +70,8 @@ OUTPUTS="RD0111 RD0166 RD0265"
 
 export OMP_NUM_THREADS=$NTASKS
 
+cd $OUT_DIR
+
 for out in $OUTPUTS; do
     python $extract $ENZO_DIR/$out/$out $HALO_DIR/halos_$out.0.bin $OUT_DIR/halodata_$out.dat
 done

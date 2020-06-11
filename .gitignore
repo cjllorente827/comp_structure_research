@@ -1,4 +1,8 @@
 *.out
+*.bin
+*.list
+*.particles
+profile.[0-9]
 *.gz
 *.tar
 **/catalogs/*

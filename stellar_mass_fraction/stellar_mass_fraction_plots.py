@@ -15,37 +15,62 @@ matplotlib.rcParams.update({"figure.facecolor": 'FFFFFF'})
 np.set_printoptions(threshold=sys.maxsize)
 
 
-def stellar_mass_fraction_scatter(hd, cutoff=1):
+def stellar_mass_fraction_scatter_multi(hd, **kwargs):
     global PLOT_DIR
-    
-    #filter by number of star particles
-    filter_func = lambda val, cut: val > cut
-    filtered_halos = filter_by(hd, Fields.NUM_STAR_PARTICLES, filter_func, cutoff)
-    
-    fig, ax = plt.subplots(1,1,figsize=(7,7))
+
+    color_field  = kwargs['color_field'] if 'color_field' in kwargs else Fields.NUM_STAR_PARTICLES
+    filter_field = kwargs['filter_field'] if 'filter_field' in kwargs else Fields.TOT_MASS
+    filter_value = kwargs['filter_value'] if 'filter_value' in kwargs else None
+
+    HEIGHT = 6
 
     # correcting for the way Behroozi calculates stellar mass fraction
     #smf_correction = 1.
     smf_correction = (0.0486)/(0.0486 + 0.2589)
+    
+    fig, ax = plt.subplots(1,1,figsize=(HEIGHT,HEIGHT))
 
+    #keeps all the plots on the same color scale
+    norm=matplotlib.colors.LogNorm()
+        
+    #filter by number of star particles
+    filter_func = lambda val, cut: val > cut
+    filtered_halos = filter_by(hd, Fields.NUM_STAR_PARTICLES, filter_func, cutoff)
+
+    #filter by halo mass
+    if filter_value is not None:
+        filtered_halos = filter_by(filtered_halos, filter_field, filter_func,\
+                                       halo_mass_filter)
+    
     im = ax.scatter(filtered_halos.halos[:,Fields.TOT_MASS],\
-              filtered_halos.halos[:,Fields.STR_MASS_FRAC]*smf_correction,\
-              c=filtered_halos.halos[:,Fields.NUM_STAR_PARTICLES],\
-                    marker='.', cmap='viridis', norm=matplotlib.colors.LogNorm())
-    ax.set_title("Stellar Mass Fraction")
+                    filtered_halos.halos[:,Fields.STR_MASS_FRAC]*smf_correction,\
+                    c=filtered_halos.halos[:,color_field],\
+                    marker='.', cmap='viridis', norm=norm)
+
+    if cutoff == 0:
+        ax.set_title("No cutoff")
+    else:
+        ax.set_title(f"Cutoff at > {cutoff} star particles")
+            
     ax.set_xlabel("$M_{tot}$  ($M_{\odot}$)")
-    ax.set_ylim(top=2., bottom=1e-6)
     ax.set_yscale('log')
     ax.set_xscale('log')
+    ax.tick_params(direction='in', which='both')
     
+    ax.set_ylim(top=2., bottom=1e-6)
     ax.set_ylabel("$M_{*}/M_{vir}$")
 
-    fig.colorbar(im, ax=ax)
+    fig.colorbar(im, ax=axes[-1])
+    fig.suptitle("Stellar Mass Fraction with different cutoffs")
     plt.show()
-    #plt.savefig("stellar_mass_fraction_bigbox.png")
 
-def stellar_mass_fraction_scatter_multi(hd, halo_mass_filter=None):
+
+def stellar_mass_fraction_scatter_multi(hd, **kwargs):
     global PLOT_DIR
+
+    color_field  = kwargs['color_field'] if 'color_field' in kwargs else Fields.NUM_STAR_PARTICLES
+    filter_field = kwargs['filter_field'] if 'filter_field' in kwargs else Fields.TOT_MASS
+    filter_value = kwargs['filter_value'] if 'filter_value' in kwargs else None
 
     HEIGHT = 6
     
@@ -72,13 +97,13 @@ def stellar_mass_fraction_scatter_multi(hd, halo_mass_filter=None):
         filtered_halos = filter_by(hd, Fields.NUM_STAR_PARTICLES, filter_func, cutoff)
 
         #filter by halo mass
-        if halo_mass_filter is not None:
-            filtered_halos = filter_by(filtered_halos, Fields.TOT_MASS, filter_func,\
+        if filter_value is not None:
+            filtered_halos = filter_by(filtered_halos, filter_field, filter_func,\
                                        halo_mass_filter)
     
         im = ax.scatter(filtered_halos.halos[:,Fields.TOT_MASS],\
               filtered_halos.halos[:,Fields.STR_MASS_FRAC]*smf_correction,\
-              c=filtered_halos.halos[:,Fields.NUM_STAR_PARTICLES],\
+              c=filtered_halos.halos[:,color_field],\
                         marker='.', cmap='viridis', norm=norm)
 
         if cutoff == 0:
