@@ -1,4 +1,4 @@
-import numpy as np
+import numpy as np            
 
 class Fields:
     # Field keys
@@ -55,8 +55,6 @@ class HaloData:
 
         return HaloData(np.shape(data)[0], data )
 
-    
-
     def save_to_file(self, outfile):
         print(f"Writing to file: {outfile}...")
         tabs = 30
@@ -76,7 +74,6 @@ class HaloData:
 
 ####################################################################
 # Returns a new HaloData object with a filtered halo list
-# hd - the HaloData object
 # field - the field to filter on
 # filter_func - the filter function to use, ideally some sort of
 #               lambda function such as lambda val, cut: val > cut
@@ -90,21 +87,20 @@ class HaloData:
 #    filter_func = lambda val, cut: val > cut
 #    filtered_halos = filter_by(hd, Fields.NUM_STAR_PARTICLES, filter_func, cutoff)
 ####################################################################
-def filter_by(hd, field, filter_func, value):
+    def filter_by(self, field, filter_func, value):
 
-    filtered_indices = []
-    for i in range(0, hd.num_halos):
-        if filter_func(hd.halos[i,field], value):
-            filtered_indices.append(i)
+        filtered_indices = []
+        for i in range(0, self.num_halos):
+            if filter_func(self.halos[i,field], value):
+                filtered_indices.append(i)
 
-    N = len(filtered_indices)
-    filtered = HaloData(N)
-    for i in range(0,N):
-        for j in range(0,Fields.NUM_FIELDS):
-            filtered.halos[i,j] = hd.halos[filtered_indices[i],j]
-    return filtered
-
-
+        N = len(filtered_indices)
+        filtered = HaloData(N)
+        for i in range(0,N):
+            for j in range(0,Fields.NUM_FIELDS):
+                filtered.halos[i,j] = self.halos[filtered_indices[i],j]
+        return filtered
+    
 ####################################################################
 # Performs a data reduction that bins the data according to a specific
 # field, and then performs a reduction on each bin, returning the result
