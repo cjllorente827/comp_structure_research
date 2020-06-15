@@ -66,9 +66,9 @@ def extract_data_to_dat_file(hc, ds, outfile):
 
             halos[i,Fields.HALO_ID] = halo['particle_identifier']
             halos[i,Fields.RADIUS] = radius.value
-            halos[i,Fields.XPOS] = halo_pos[0].in_units('kpc').value
-            halos[i,Fields.YPOS] = halo_pos[1].in_units('kpc').value
-            halos[i,Fields.ZPOS] = halo_pos[2].in_units('kpc').value
+            halos[i,Fields.XPOS] = halo_pos[0].in_units('Mpc')
+            halos[i,Fields.YPOS] = halo_pos[1].in_units('Mpc')
+            halos[i,Fields.ZPOS] = halo_pos[2].in_units('Mpc')
             halos[i,Fields.STR_MASS] = stellar_mass
             halos[i,Fields.GAS_MASS] = gas_mass
             halos[i,Fields.BAR_MASS] = baryon_mass

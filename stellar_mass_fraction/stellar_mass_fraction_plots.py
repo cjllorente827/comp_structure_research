@@ -139,8 +139,7 @@ def baryon_frac(hd, z):
     ax.set_ylabel("Mass fraction $(M/(\Omega_b/\Omega_m)/M_h )$")
     ax.set_xlabel("$M_* (M_{\odot})$")
     plt.show()
-
-
+    
 def hist_2d(hd, z):
     greater_than = lambda val, cut: val > cut
     
