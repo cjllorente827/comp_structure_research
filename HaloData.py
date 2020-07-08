@@ -2,39 +2,51 @@ import numpy as np
 
 class Fields:
     # Field keys
-    HALO_ID          = 0
-    XPOS             = 1
-    YPOS             = 2
-    ZPOS             = 3
-    RADIUS           = 4
-    STR_MASS         = 5
-    BAR_MASS         = 6
-    GAS_MASS         = 7
-    STR_MASS_FRAC    = 8
-    DM_MASS          = 9
-    TOT_MASS         = 10
+    HALO_ID            = 0
+    XPOS               = 1
+    YPOS               = 2
+    ZPOS               = 3
+    RADIUS             = 4
+    STR_MASS           = 5
+    BAR_MASS           = 6
+    GAS_MASS           = 7
+    STR_MASS_FRAC      = 8
+    DM_MASS            = 9
+    TOT_MASS           = 10
     NUM_STAR_PARTICLES = 11
-    
-    NUM_FIELDS       = 12
+    GAS_METAL_FRAC     = 12
+    STR_METAL_FRAC     = 13
 
-    FIELD_LIST_VERSION = 1.1
+    NUM_FIELDS         = 14
+
+    FIELD_LIST_VERSION = 1.2
 
     # Field names
     names = [
         "Halo Id",
-        "Xpos",
-        "Ypos",
-        "Zpos",
-        "Radius",
-        "Stellar Mass",
-        "Baryon Mass",
-        "Gas Mass",
+        "Xpos (Mpc)",
+        "Ypos (Mpc)",
+        "Zpos (Mpc)",
+        "Radius (Mpc)",
+        "Stellar Mass (Msun)",
+        "Baryon Mass (Msun)",
+        "Gas Mass (Msun)",
         "Stellar Mass Fraction",
-        "Dark Matter Mass",
-        "Total Mass",
-        "Star Particles"
+        "Dark Matter Mass (Msun)",
+        "Total Mass (Msun)",
+        "Star Particles",
+        "Gas Metal Fraction (Zsun)",
+        "Star Metal Fraction (Zsun)",
     ]
 
+####################################################
+# Some basic filter functions
+####################################################
+greater_than = lambda x,y: x>y
+less_than = lambda x,y: x<y
+greater_than_or_equal_to = lambda x,y: x>=y
+less_than_or_equal_to = lambda x,y: x<=y
+equal_to = lambda x,y: x==y
     
 class HaloData:
 
@@ -45,6 +57,8 @@ class HaloData:
         self.halos = data if data is not None else np.zeros((num_halos, Fields.NUM_FIELDS))
         self.num_halos = num_halos
 
+    # Stub method
+    # TODO: Fill this out to reject files with different version numbers
     def check_version(infile):
         pass
     
@@ -57,7 +71,7 @@ class HaloData:
 
     def save_to_file(self, outfile):
         print(f"Writing to file: {outfile}...")
-        tabs = 30
+        tabs = 35
         header = f"Version: {Fields.FIELD_LIST_VERSION}\n"
         header += '\t'.join(Fields.names).expandtabs(tabs) + '\n'
         format_str = '\t'.join(['%3d'] + ["%.10e"]*(Fields.NUM_FIELDS-1)) + '\n'
@@ -84,8 +98,8 @@ class HaloData:
 #
 # Example:
 #    cutoff = 1e10 # ignore halos less than 1e10 solar masses
-#    filter_func = lambda val, cut: val > cut
-#    filtered_halos = filter_by(hd, Fields.NUM_STAR_PARTICLES, filter_func, cutoff)
+#    greater_than = lambda val, cut: val > cut
+#    filtered_halos = hd.filter_by(Fields.NUM_STAR_PARTICLES, greater_than, cutoff)
 ####################################################################
     def filter_by(self, field, filter_func, value):
 

@@ -63,32 +63,37 @@ def stellar_mass_fraction_scatter(hd, **kwargs):
     fig.suptitle("Stellar Mass Fraction")
     plt.show()
 
-def stellar_mass_fraction_reduced(hd, z):
+def stellar_mass_fraction_reduced(hd_list, z_list):
 
-    reduced_data = apply_reduction(hd, Fields.TOT_MASS, Fields.STR_MASS, \
-                                   [np.median,np.max,np.min], bin_scale='log')
-
-    hm, median_sm, max_sm, min_sm = reduced_data
-
-    median_sm_fit = SM_FIT_FUNC(hm, z)
+    fig, ax = plt.subplots(1,2,figsize=(18,7))
     omega = (0.0486)/(0.0486 + 0.2589)
 
-    median_fsm = median_sm/hm
-    median_fsm_fit = median_sm_fit/hm
+    colors    = ['r','g','b']
+
+    fit_domain = np.logspace(10, 15)
     
-    fig, ax = plt.subplots(1,2,figsize=(18,7))
+    for hd, z, color in zip(hd_list, z_list, colors):
+        reduced_data = apply_reduction(hd, Fields.TOT_MASS, Fields.STR_MASS, \
+                                   [np.median,np.max,np.min], bin_scale='log')
 
-    # stellar mass
-    ax[0].plot(hm, median_sm, label='Median $M_*$')
-    ax[0].plot(hm, median_sm_fit, label='Behroozi fit')
+        hm, median_sm, max_sm, min_sm = reduced_data
 
-    #ax[0].fill_between(hm, max_sm, min_sm, alpha=0.25)
+        median_sm_fit = SM_FIT_FUNC(fit_domain, z)
 
-    # stellar mass fraction
-    ax[1].plot(hm, median_fsm, label='Median $f_{sm}$')
-    ax[1].plot(hm, median_fsm_fit, label='Behroozi fit')
+        median_fsm = median_sm/hm
+        median_fsm_fit = median_sm_fit/fit_domain
+    
+        # stellar mass
+        ax[0].plot(hm, median_sm, label=f'$z=${z}', c=color)
+        ax[0].plot(fit_domain, median_sm_fit, linestyle='dashed', c=color)
 
-    #ax[1].fill_between(hm, max_sm/hm, min_sm/hm, alpha=0.25)
+        #ax[0].fill_between(hm, max_sm, min_sm, alpha=0.25)
+
+        # stellar mass fraction
+        ax[1].plot(hm, median_fsm, label=f'$z=${z}', c=color)
+        ax[1].plot(fit_domain, median_fsm_fit, linestyle='dashed', c=color)
+
+        #ax[1].fill_between(hm, max_sm/hm, min_sm/hm, alpha=0.25)
 
     ax[0].set_xscale('log')
     ax[0].set_yscale('log')
@@ -97,8 +102,10 @@ def stellar_mass_fraction_reduced(hd, z):
 
     ax[0].set_ylabel('$M_* (M_{\odot})$')
     ax[0].set_xlabel('$M_h (M_{\odot})$')
-    
-    ax[1].set_ylim(1e-5, 2)
+    ax[0].set_xlim(0.9*min(fit_domain), 1.1*max(fit_domain))
+
+    ax[1].set_xlim(0.9*min(fit_domain), 1.1*max(fit_domain))
+    ax[1].set_ylim(1e-4, 0.1)
     ax[1].set_ylabel('$f_{sm} = M_*/M_h$')
     ax[1].set_xlabel('$M_h (M_{\odot})$')
     ax[1].legend(loc=(1.1,0.5))

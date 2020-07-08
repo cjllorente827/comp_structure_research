@@ -22,6 +22,7 @@ NUM_THREADS = pymp.config.num_threads[0]
 from HaloData import HaloData, Fields
 import numpy as np
 
+
 def stars(pfilter, data):
     filter = data[("all", "particle_type")] == 2 # DM = 1, Stars = 2
     return filter
@@ -44,11 +45,16 @@ def extract_data_to_dat_file(hc, ds, outfile):
                 halo['particle_position_z']
             )
 
-            radius = halo['virial_radius'].in_units('kpc')
+            radius = halo['virial_radius'].in_units('Mpc')
             sphere = ds.sphere(halo_pos, radius)
             totals = sphere.quantities.total_mass().in_units('Msun').value
             stellar_mass = sphere[('stars', 'particle_mass')].sum().in_units('Msun').value
+            
             num_star_particles = len(sphere[('stars', 'particle_mass')])
+
+            gas_metal_frac = np.median(sphere[('gas','metallicity')].to('Zsun'))
+            str_metal_frac = np.median(sphere[('stars','metallicity_fraction')].to('Zsun'))\
+                if num_star_particles != 0 else 0.
 
             omega_b = 0.0486
             omega_c = 0.2589
@@ -76,8 +82,14 @@ def extract_data_to_dat_file(hc, ds, outfile):
             halos[i,Fields.STR_MASS_FRAC] = str_mass_fraction
             halos[i,Fields.TOT_MASS] = total_mass
             halos[i,Fields.NUM_STAR_PARTICLES] = num_star_particles
-            # print(f"    Thread {p.thread_num} finished Halo {i}")
+            halos[i,Fields.GAS_METAL_FRAC] = gas_metal_frac
+            halos[i,Fields.STR_METAL_FRAC] = str_metal_frac
+
+    #end parallel section
+                
     print("All halos parsed.")
+
+    
     return HaloData(num_halos, halos)
 
 
@@ -88,6 +100,7 @@ def main(enzo_in, rockstar_in, outfile):
         hds = yt.load(rockstar_in)
 
         hc = HaloCatalog(data_ds=ds, halos_ds=hds)
+        hc.add_filter('not_subhalo')
         hc.load()
 
         start_time = time()
