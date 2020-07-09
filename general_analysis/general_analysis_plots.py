@@ -15,8 +15,7 @@ matplotlib.rcParams.update({'font.size': 16})
 matplotlib.rcParams.update({"figure.facecolor": 'FFFFFF'})
 np.set_printoptions(threshold=sys.maxsize)
 
-def inspect_halo(ds, halo, zoom=2):
-
+def to_YTRegion(ds, halo):
     radius = ds.quan(halo[Fields.RADIUS], 'Mpc')
     quans = [ds.quan(x, 'Mpc') for x in [\
                                          halo[Fields.XPOS],\
@@ -26,6 +25,12 @@ def inspect_halo(ds, halo, zoom=2):
     halo_pos =  np.array(quans) / ds.domain_width.to('Mpc').value
 
     sphere = ds.sphere(halo_pos, radius)
+    return sphere
+
+    
+def inspect_halo(ds, halo, zoom=2):
+    
+    sphere = to_YTRegion(ds, halo)
 
     HEIGHT = 16
     axes = [None]*4
@@ -93,26 +98,38 @@ def metallicity_vs_stellar_mass(hd, z):
     plt.title(f'Stellar Metallicity vs. Stellar Mass for massive halos at $z={z}$')
     plt.show()
 
-def star_formation(ds):
+def star_formation(ds, halo):
 
-    fig, axes = plt.subplots(1,2,figsize=(18,7))
+    fig, axes = plt.subplots(1,1,figsize=(18,7))
 
+    z_start = 4
+    z_end   = 0
 
-    ad = ds.all_data()
+    t_start = ds.cosmology.t_from_z(z_start).in_units('Gyr').value
+    t_end   = ds.cosmology.t_from_z(z_end).in_units('Gyr').value
+
+    #ad = ds.all_data()
+    ad = to_YTRegion(ds, halo)
     masses = ad[('stars', 'particle_mass')].in_units('Msun')
-    formation_time = ad[('stars', 'creation_time')].in_units('yr')
+    formation_time = ad[('stars', 'creation_time')].in_units('Gyr') 
 
-    time_range = [0, 5e8] # years
+    time_range = [t_start, t_end]
     n_bins = 1000
     hist, bins = np.histogram(formation_time, bins=n_bins, range=time_range)
     inds = np.digitize(formation_time, bins=bins)
     time = (bins[:-1] + bins[1:])/2
 
+    redshift = ds.cosmology.z_from_t(time*ds.quan(1,'Gyr'))
+
     sfr = np.array([masses[inds == j+1].sum()/(bins[j+1]-bins[j]) for j in range(len(time))])
     sfr[sfr == 0] = np.nan
 
-    axes[0].plot(time/1e6, sfr)
-    axes[0].set_xlabel('Time  [Myr]')
-    axes[0].set_ylabel('SFR  [M$_\odot$ yr$^{-1}$]')
+    ssfr = sfr/halo[Fields.STR_MASS]
+    
+    axes.plot(redshift, ssfr, c='b')
+    axes.set_xlim(z_start,z_end)
+    axes.set_xlabel('redshift')
+    axes.set_ylabel('sSFR  [yr$^{-1}$]')
     
     plt.show()
+
