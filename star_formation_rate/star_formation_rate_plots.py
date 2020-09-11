@@ -1,137 +1,94 @@
-############################################################################
-# This code uses the extracted halo data along with the original
-# Enzo dataset in order to create star formation histories of each halo
-#
-# The file it creates has the following format
-# Halo ID | Stellar Mass (Msun) | SFR at z=start .............. SFR at z=end (Msun/yr) |
-#
-# This allows for a single dataset from which the SFR and sSFR can be derived
-#
-# The code relies on these settings for the starting redshift and ending
-# redshift, as well as the amount of bins to create.
-# These will be used to create a series of bins equally spaced in redshift-space
-# for stars to be sorted into
-
-z_start = 8
-z_end   = 0
-nbins   = 10
-############################################################################
-
 
 import sys
 
-if len(sys.argv) != 3:
+def print_help_and_exit():
     print("""
-Usage: python star_formation_rate_plots.py <enzo_dataset> <halo_dataset>
+Usage: python star_formation_rate_plots.py <enzo_dataset> <halo_dataset> <output file prefix> <full-run|plots-only>
     """)
     exit()
+    
+if len(sys.argv) != 5:
+    print_help_and_exit()
+    
 sys.path.append('/mnt/home/llorente/comp_structure_research')
 
-import yt
-yt.funcs.mylog.setLevel(50)
-yt.enable_parallelism()
-
-def stars(pfilter, data):
-    filter = data[("all", "particle_type")] == 2 # DM = 1, Stars = 2
-    return filter
-
-yt.add_particle_filter("stars", function=stars, filtered_type='all', \
-                       requires=["particle_type"])
-
-from time import time
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 from HaloData import *
-from tqdm import tqdm
+from HaloHistory import HaloHistory, load_history
 from matplotlib.colors import LogNorm
 
 matplotlib.rcParams.update({'font.size': 16})
 matplotlib.rcParams.update({"figure.facecolor": 'FFFFFF'})
 np.set_printoptions(threshold=sys.maxsize)
 
-########################################################################
-# Takes in a dataset and a halo and returns an array containing 
-# specific star formation rate during the specified time
-########################################################################
-def determine_halo_ssfr(ds, halo, t_start, t_end, tbins):
-    global nbins
+RUN_DATA_EXTRACTION = False
+OUTPUT_PREFIX = ''
 
-    ad = to_YTRegion(ds, halo)
-    masses = ad[('stars', 'particle_mass')].in_units('Msun')
-    formation_time = ad[('stars', 'creation_time')].in_units('yr')
+def inspect_history(hist):
+    rows = 2
+    cols = 1
+    fig, axes = plt.subplots(rows,cols,figsize=(18*cols,7*rows))
 
-    # Using equally spaced time bins
-    time_range = [t_start, t_end]
+    index = 0
 
-    hist, bins = np.histogram(formation_time, bins=nbins, range=time_range)
-    inds = np.digitize(formation_time, bins=bins)
+    m = hist.ssfr_fit[index,0]
+    b = hist.ssfr_fit[index,1]
+    fit = lambda t: 10**(m*np.log10(t) + b)
 
-    tbins = (bins[:-1] + bins[1:])/2 if tbins is None else tbins
-
-    # cumulative stellar mass
-    csm = np.array([masses[inds <= j+1].sum() for j in range(len(tbins))])
-
-    # star formation rate
-    sfr = np.array([masses[inds == j+1].sum()/(bins[j+1]-bins[j]) for j in range(len(tbins))])
-
-    # specific star formation rate
-    ssfr = sfr/csm
-
-    #replace all NaN values with zeros
-    ssfr[np.isnan(ssfr) == True] = 0.0
-
-    return ssfr, tbins
-
-
-def calculate_ssfr_for_dataset(ds, hd):
-    global z_start, z_end, nbins
-
-    t_start = float(ds.cosmology.t_from_z(z_start).in_units('yr').value)
-    t_end   = float(ds.cosmology.t_from_z(z_end).in_units('yr').value)
-
-
-    ssfr = np.zeros((hd.num_halos, nbins))
-    tbins = None
-
-    start = time()    
-    for i, halo in enumerate(hd.halos):
-        ssfr[i], tbins = determine_halo_ssfr(ds, halo, t_start, t_end, tbins)
-        
+    axes[0].loglog(hist.tbins/1e9, fit(hist.tbins), c='b', linestyle='dashed')
+    axes[0].loglog(hist.tbins/1e9, hist.ssfr[index], c='b', linewidth=0, marker='o')
+    axes[1].loglog(hist.tbins/1e9, hist.csm[index], c='b', linewidth=0, marker='o')
     
-        if i > 20:
-            elapsed = time() - start
+    axes[0].set_xlabel('Time (Gyr)')
+    axes[0].set_ylabel('sSFR  [yr$^{-1}$]')
 
-            if yt.is_root(): 
-                print(f"Calculation of star formation rates took {elapsed} seconds.")
+    plt_fname = f"{OUTPUT_PREFIX}_inspect.png"
+    print(f"Saving plot to {plt_fname}")
+    fig.savefig(plt_fname)
 
-            return ssfr[:20]
-    # power law fit function with unit adjusting constant, k
-    # horizontal offset, o
-    # and power law slope, a
-    # fit_func = lambda t, k1,a1,o1:  k1*(t-o1)**(-a1)
-    # p, popt = curve_fit(fit_func, tbins[np.isnan(ssfr) == False], ssfr[np.isnan(ssfr) == False], p0=[1e-3,1,1e9])
-    # ssfr_fit = lambda t: fit_func(t, p[0], p[1], p[2])
+    
 
+def ssfr_v_sm(hist):
+    pass
 
-def main(ds_fname, hd_fname):
-    if yt.is_root(): 
-        print(f"Reading from {ds_fname}")
-    ds = yt.load(ds_fname)
-    ds.add_particle_filter('stars')
+def data_extraction(ds_fname, hd_fname, redshifts, pkl_fname):
+    global RUN_DATA_EXTRACTION
+    hist = HaloHistory(ds_fname, hd_fname, redshifts)
 
-    hd = HaloData.load_from_file(hd_fname)
-    hd = hd.filter_by(Fields.STR_MASS, greater_than, 1e9)
+    print(f"Outputting HaloHistory to {pkl_fname}")
+    hist.dump(pkl_fname)
+    return hist
 
-    if yt.is_root(): 
-        print(f"Calculating ssfr for {hd.num_halos} halos")
-    result = calculate_ssfr_for_dataset(ds, hd)
-    if yt.is_root():
-        print(result)
+def make_plots(halo_history):
+    inspect_history(halo_history)
+    ssfr_v_sm(halo_history)
+
+def main(ds_fname, hd_fname, pkl_fname):
+
+    redshifts = [0.1,0.5,1,2,3,4,5,6,7,8]
+    hist = None
+    if RUN_DATA_EXTRACTION:
+        hist = data_extraction(ds_fname, hd_fname, redshifts, pkl_fname)
+    else:
+        hist = load_history(pkl_fname)
+
+    make_plots(hist)
+
 
 if __name__ == "__main__":
-    ds_fname = sys.argv[1]
-    hd_fname = sys.argv[2]
+    ds_fname   = sys.argv[1]
+    hd_fname   = sys.argv[2]
+    OUTPUT_PREFIX = sys.argv[3]
 
+    pkl_fname = f"{OUTPUT_PREFIX}_HaloHistory.pkl"
 
-    main(ds_fname, hd_fname)
+    if sys.argv[4] == 'full-run':
+        RUN_DATA_EXTRACTION = True
+    elif sys.argv[4] == 'plots-only':
+        RUN_DATA_EXTRACTION = False
+    else:
+        print_help_and_exit()
+
+    main(ds_fname, hd_fname, pkl_fname)

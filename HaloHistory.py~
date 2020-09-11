@@ -1,0 +1,176 @@
+###############################################################################
+# The purpose of this object is to generate measurements of certain properties
+# of halos at a set of given redshifts. It will then output the values it 
+# gathers to a binary output file (using pickle) that can be then easily be
+# read back in and used to make plots/generate derived quantities. 
+###############################################################################
+
+import sys
+
+sys.path.append('/mnt/home/llorente/comp_structure_research')
+
+import pymp
+NUM_THREADS = pymp.config.num_threads[0]
+
+import yt
+yt.funcs.mylog.setLevel(50)
+
+import pickle
+
+
+def stars(pfilter, data):
+    filter = data[("all", "particle_type")] == 2 # DM = 1, Stars = 2
+    return filter
+
+yt.add_particle_filter("stars", function=stars, filtered_type='all', \
+                       requires=["particle_type"])
+
+from time import time
+import numpy as np
+from HaloData import *
+
+# linear fit function
+lin_func = lambda x, m,b: m*x + b
+nparams = 2
+nbins   = 1000
+
+########################################################################
+# Takes in a dataset and a halo and returns an array containing 
+# specific star formation rate as well as a least squares fit 
+# to a power law for the sSFR. Returns the time bins and cumulative 
+# stellar mass function as well
+########################################################################
+def determine_halo_ssfr(ds, halo, t_start, t_end, tbins):
+    global nbins
+
+    ad = to_YTRegion(ds, halo)
+    masses = ad[('stars', 'particle_mass')].in_units('Msun')
+    formation_time = ad[('stars', 'creation_time')].in_units('yr')
+
+    # Using equally spaced time bins
+    time_range = [t_start, t_end]
+
+    hist, bins = np.histogram(formation_time, bins=nbins, range=time_range)
+    inds = np.digitize(formation_time, bins=bins)
+
+    tbins = (bins[:-1] + bins[1:])/2 if tbins is None else tbins
+
+    # cumulative stellar mass
+    csm = np.array([masses[inds <= j+1].sum() for j in range(len(tbins))])
+
+    # star formation rate
+    sfr = np.array([masses[inds == j+1].sum()/(bins[j+1]-bins[j]) for j in range(len(tbins))])
+
+    # specific star formation rate
+    ssfr = np.array([sfr[i]/csm[i] if csm[i] > 0 else 0. for i in range(len(sfr))])
+    
+    # enforce a minimum ssfr
+    # allows log plotting, ignored by fits
+    ssfr_floor = 1e-13
+    ssfr[ssfr < ssfr_floor] = ssfr_floor
+
+    # do curve fits ignoring the time periods before there were any stars
+    guess = np.array([1,-1])
+    
+    # cuts out the times before stars appear
+    tbins_fit = tbins[csm>0]
+    ssfr_fit = ssfr[csm>0]
+
+    # ignores data points with the ssfr floor
+    tbins_fit = tbins[ssfr > 1e-13]
+    ssfr_fit = ssfr[ssfr > 1e-13]
+    
+    try : 
+        p, popt = curve_fit(lin_func,
+                            np.log10(tbins_fit),
+                            np.log10(ssfr_fit),
+                            p0=guess)
+    except :
+        print(f"Failed to fit halo {halo[Fields.HALO_ID]} with mass {halo[Fields.STR_MASS]:.1e}")
+        p = np.array([np.nan]*nparams)
+        
+    return ssfr, p, tbins, csm
+
+def calculate_ssfr_for_dataset(ds, hd, z_start, z_end):
+    global nbins, nparams
+
+    t_start = float(ds.cosmology.t_from_z(z_start).in_units('yr').value)
+    t_end   = float(ds.cosmology.t_from_z(z_end).in_units('yr').value)
+
+    ssfr = pymp.shared.array((hd.num_halos, nbins))
+    ssfr_fit_params = pymp.shared.array((hd.num_halos, nparams))
+    csm = pymp.shared.array((hd.num_halos, nbins))
+
+    tbins = None
+
+    start = time()    
+
+    range_end = 80 # for testing purposes
+    #range_end = hd.num_halos # for actually running the code
+    with pymp.Parallel(NUM_THREADS) as p:
+        for i in p.xrange(range_end):
+            halo = hd.halos[i]
+            ssfr[i], ssfr_fit_params[i], tbins, csm[i] = \
+                determine_halo_ssfr(ds, halo, t_start, t_end, tbins)
+            # print(f"Thread {p.thread_num} processing halo {i}")
+            # print(ssfr[i])
+    # end parallel section
+
+    elapsed = time() - start
+    print(f"Calculation of star formation rates took {elapsed} seconds.")
+
+    # remove any halos that failed to achieve fits
+    idx_removal = np.array([not x for x in np.isnan(ssfr_fit[:,0])])
+    ssfr = ssfr[idx_removal]
+    ssfr_fit = ssfr_fit[idx_removal]
+    csm = csm[idx_removal]
+
+    print(f"Calculated ssfr fits for {len(ssfr)} halos out of {range_end}. \
+    ({int(100*len(ssfr)/range_end)}%)")
+
+    return ssfr, ssfr_fit_params, tbins, csm
+
+def z_to_t(ds, z):
+    return float(ds.cosmology.t_from_z(z).in_units('yr').value)
+
+def get_values_for_redshifts():
+    pass
+
+def get_fit_values_for_redshifts():
+    pass
+
+class HaloHistory:
+
+    nhalos = 0
+    ds_fname = ''
+    ds = None
+    hd = None
+    ssfr = None # specific star formation rates per halo per redshift
+    csm = None # cumulative stellar mass per halo per redshift
+    redshifts = None 
+
+    ##############################################################
+    # Takes in an enzo dataset, a halo dataset, and a list of 
+    # redshifts to take datapoints for. 
+    ##############################################################
+    def __init__(self, ds, hd, redshifts):
+        self.ds = ds
+        self.hd = hd
+        self.redshifts = redshifts
+        ssfr, ssfr_fit, tbins, csm = calculate_ssfr_for_dataset(ds, hd, np.max(redshifts), np.min(redshifts))
+
+        self.ssfr = get_fit_values_for_redshifts(ssfr_fit, redshifts)
+        self.csm = get_values_for_redshifts(csm, tbins, redshifts)
+
+    def dump(self, fname):
+        with open(fname, 'wb') as f:
+            pickle.dump(self, f)
+
+
+def load_history(fname):
+    with open(fname, 'rb') as f:
+        hist = pickle.load(f)
+    return hist
+
+
+
