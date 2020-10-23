@@ -1,4 +1,6 @@
-import numpy as np            
+
+from universal import *
+
 
 class Fields:
     # Field keys
@@ -39,14 +41,6 @@ class Fields:
         "Star Metal Fraction (Zsun)",
     ]
 
-####################################################
-# Some basic filter functions
-####################################################
-greater_than = lambda x,y: x>y
-less_than = lambda x,y: x<y
-greater_than_or_equal_to = lambda x,y: x>=y
-less_than_or_equal_to = lambda x,y: x<=y
-equal_to = lambda x,y: x==y
     
 class HaloData:
 
@@ -68,6 +62,15 @@ class HaloData:
         data = np.genfromtxt(infile, skip_header=2)
 
         return HaloData(np.shape(data)[0], data )
+
+    def load(fname):
+        with open(fname, 'rb') as f:
+            obj = pickle.load(f)
+        return obj
+
+    def dump(self, fname):
+        with open(fname, 'wb+') as f:
+            pickle.dump(self, f)
 
     def save_to_file(self, outfile):
         print(f"Writing to file: {outfile}...")
@@ -194,17 +197,18 @@ def apply_reduction(hd, bin_field, field, func, bin_scale='lin', nbins=None):
 
     return reduced_data 
 
+
 ####################################################################################
-# Takes in a YT dataset object and a single halo and returns a YT Region object
+# Takes in a YT dataset object and a single halo and returns a YT Sphere object
 ####################################################################################
-def to_YTRegion(ds, halo):
-    radius = ds.quan(halo[Fields.RADIUS], 'Mpc')
-    quans = [ds.quan(x, 'Mpc') for x in [\
+def to_YTRegion(ds, halo, length_unit='Mpc'):
+    radius = ds.quan(halo[Fields.RADIUS], length_unit)
+    quans = [ds.quan(x, length_unit) for x in [\
                                          halo[Fields.XPOS],\
                                          halo[Fields.YPOS],\
                                          halo[Fields.ZPOS]]]
     
-    halo_pos =  np.array(quans) / ds.domain_width.to('Mpc').value
+    halo_pos =  np.array(quans) / ds.domain_width.to(length_unit).value
 
     sphere = ds.sphere(halo_pos, radius)
     return sphere

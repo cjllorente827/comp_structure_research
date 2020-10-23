@@ -6,11 +6,11 @@ from yt.data_objects.particle_filters import add_particle_filter
 from yt.extensions.astro_analysis.halo_finding.rockstar.api import RockstarHaloFinder
 yt.enable_parallelism()
 
-def stars(pfilter, data):
+def StarParticle(pfilter, data):
     filter = data[("all", "particle_type")] == 2 # DM = 1, Stars = 2
     return filter
 
-yt.add_particle_filter("stars", function=stars, filtered_type='all', \
+add_particle_filter("stars", function=StarParticle, filtered_type='all', \
                        requires=["particle_type"])
 
 def DarkMatter(pfilter, data):

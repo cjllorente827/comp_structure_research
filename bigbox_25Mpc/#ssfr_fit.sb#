@@ -1,0 +1,25 @@
+#!/bin/bash
+#SBATCH --time=00:05:00
+#SBATCH --job-name=ssfr
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=8
+#SBATCH --mem=128G
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=llorente@msu.edu
+
+ENZODIR=/mnt/home/llorente/cosmo_bigbox/25Mpc_512
+OUTDIR=/mnt/home/llorente/comp_structure_research/bigbox_25Mpc
+ssfr=/mnt/home/llorente/comp_structure_research/star_formation_rate/star_formation_rate_plots.py
+
+cd $OUT_DIR
+
+OUTFILE="RD0265"
+
+#export OMP_NUM_THREADS=$SLURM_NTASKS
+export OMP_NUM_THREADS=8
+
+export RUNMODE="full-run"
+#export RUNMODE="plots-only"
+
+python $ssfr $ENZODIR/$OUTFILE/$OUTFILE $OUTDIR/halodata_$OUTFILE.dat $OUTDIR/$OUTFILE $RUNMODE
+
