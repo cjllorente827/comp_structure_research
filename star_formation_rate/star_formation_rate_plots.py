@@ -80,7 +80,9 @@ def main(ds_fname, hd_fname, pkl_fname):
 if __name__ == "__main__":
     ds_fname   = sys.argv[1]
     hd_fname   = sys.argv[2]
-    pkl_fname = str(sys.argv[3])
+    OUTPUT_PREFIX = sys.argv[3]
+
+    pkl_fname = f"{OUTPUT_PREFIX}_HaloHistory.pkl"
 
     if sys.argv[4] == 'full-run':
         RUN_DATA_EXTRACTION = True
@@ -88,5 +90,6 @@ if __name__ == "__main__":
         RUN_DATA_EXTRACTION = False
     else:
         print_help_and_exit()
+
 
     main(ds_fname, hd_fname, pkl_fname)
