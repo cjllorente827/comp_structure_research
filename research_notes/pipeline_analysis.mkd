@@ -1,0 +1,7 @@
+# Pipeline Analysis
+
+Analysis pertaining to the functionality/performance of the halo analysis pipeline code I'm writing
+
+## Results of last scaling test run
+Run around December 7, 2020
+![scaling_test_results.png](imgs/scaling_test_results.png)

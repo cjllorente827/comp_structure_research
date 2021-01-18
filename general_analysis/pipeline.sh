@@ -2,16 +2,20 @@
 
 #####################################################
 # Main pipeline script for general analysis
+#
+# Arguments
+# {1} - Parameter file that sets values required for
+#       the script to run
 #####################################################
 
 
 #SBATCH -A galaxies
-#SBATCH --time=10:00:00             
+#SBATCH --time=00:30:00             
 #SBATCH --nodes=1                 
-#SBATCH --ntasks=64
+#SBATCH --ntasks=16
 #SBATCH --cpus-per-task=1
 #SBATCH --mem-per-cpu=10G            
-#SBATCH --job-name pipeline-scaling-test
+#SBATCH --job-name gen-analysis-pipeline
 
 export PATH=/mnt/home/llorente/yt-conda/bin:$PATH
 
