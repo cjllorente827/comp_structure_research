@@ -1,11 +1,12 @@
 #!/bin/bash -login
- 
+
+#SBATCH -A galaxies
 #SBATCH --time=120:00:00             
 #SBATCH --nodes=1                 
 #SBATCH --ntasks=9                  
 #SBATCH --cpus-per-task=1
 #SBATCH --mem-per-cpu=10G            
-#SBATCH --job-name jupyter-session
+#SBATCH --job-name jupyter-analysis
  
 unset XDG_RUNTIME_DIR
 

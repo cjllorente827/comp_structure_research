@@ -2,10 +2,12 @@ import sys
 import yt
 yt.funcs.mylog.setLevel(50)
 
+from universal import *
+
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
-from HaloData import *
+from HaloData import Fields, HaloData, to_YTRegion
 from matplotlib.animation import FuncAnimation
 from mpl_toolkits.axes_grid1 import AxesGrid, make_axes_locatable
 from tqdm import tqdm

@@ -1,0 +1,6 @@
+NPROC=8
+HOME="/mnt/home/llorente"
+SQUIRREL="${HOME}/comp_structure_research/general_analysis/src/squirrel.py"
+ENZO_DATASET="${HOME}/cosmo_bigbox/25Mpc_512/RD0265/RD0265"
+HALO_DATASET="${HOME}/comp_structure_research/bigbox_25Mpc/data/halodata_RD0265.pkl"
+OUTPUT_DIR="${HOME}/comp_structure_research/bigbox_25Mpc/data"

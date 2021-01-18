@@ -1,0 +1,17 @@
+# Misc yt Notes
+
+This is for random little snippets of yt-related code required to do basic utility stuff that isn't well-documented anywhere or intuitive to write.
+
+<details>
+<summary>Getting the number of processes in yt's parallel mode </summary>
+
+```
+yt.enable_parallelism()
+
+from yt.utilities.parallel_tools.parallel_analysis_interface \
+    import communication_system
+
+NUM_PROCS = communication_system.communicators[-1].size
+```
+
+</details>
