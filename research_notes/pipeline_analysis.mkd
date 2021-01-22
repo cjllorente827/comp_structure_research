@@ -22,5 +22,3 @@ Contains:
         - Running rockstar
         - Extracting halo catalog data into pickle objects
         - Universal functions (particle filters, other filters)
-        - Utilities (
- --> 

@@ -17,6 +17,7 @@
 #SBATCH --mem-per-cpu=10G            
 #SBATCH --job-name gen-analysis-pipeline
 
+
 export PATH=/mnt/home/llorente/yt-conda/bin:$PATH
 
 
