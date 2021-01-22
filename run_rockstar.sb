@@ -31,6 +31,12 @@ else
     [ -f server.out ] && rm -v server*.out
 fi
 
+#TODO: Something to look into here
+#  This script creates a rockstar server in the background and then a number of client rockstar
+#  processes equal to the number of tasks given to the slurm script. This could cause an issue
+#  if the server process is competing with one (or more) of the client processes for processor
+#  time. Check to see if this is the case and modify the script if it is
+
 ./rockstar-galaxies -c $cfg >& server.out&
 while [ ! -e rockstar_halos/auto-rockstar.cfg ]; do
     sleep 1

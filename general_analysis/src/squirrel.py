@@ -1,3 +1,30 @@
+###########################################################
+# General Analysis Squirrel
+#
+# Reads in an enzo dataset along with a corresponding
+# halo catalog and creates a series of yt data objects
+# that represent each individual halo. Automatically filters
+# halos based on configuration settings below.
+#
+# Arguments:
+# enzo_dataset - Name of the enzo dataset
+# halo_dataset - Name of the halo dataset
+# output_dir - Directory where output files should be saved
+###########################################################
+
+###########################################################
+# Configuration Options
+#
+# Basic configuration options that need to be changed
+# quickly but not so often that it requires the reading
+# or maintenance of another file
+###########################################################
+
+# Halos that do not meet these criteria will be filtered 
+# out of the final dataset
+MIN_STAR_PARTICLES = 10  # Minimum number of star particles
+MIN_HALO_MASS = 1e11     # Minimum total/halo mass (includes dark & baryonic matter)
+
 import os
 from universal import *
 
@@ -33,8 +60,6 @@ add_particle_filter("stars", function=StarParticle, filtered_type='all', \
 
 extracted_fields = ['density', 'metallicity','temperature', ('deposit', 'stars_density')]
 
-                    
-       
 def inspect_halos(ds, hd, output_dir=None):
     global extracted_fields
 
@@ -72,8 +97,8 @@ if __name__ == '__main__':
     
     start = get_time()
     hd = HaloData.load(halo_fname)
-    hd = hd.filter_by(Fields.NUM_STAR_PARTICLES, greater_than, 10)\
-           .filter_by(Fields.TOT_MASS, greater_than, 1e11)
+    hd = hd.filter_by(Fields.NUM_STAR_PARTICLES, greater_than, MIN_STAR_PARTICLES)\
+           .filter_by(Fields.TOT_MASS, greater_than, MIN_HALO_MASS)
     halo_time = get_time() - start
 
     yt.only_on_root(print, f"Halo dataset loaded")

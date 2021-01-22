@@ -9,15 +9,26 @@ restart_snap = None  # filename of the first dataset in the restart
                      # (None for no restart; True to automatically find the output)
 rockstar_base_cfg = "rockstar_base.cfg"
 rockstar_cfg = "rockstar.cfg"
-outbase = "/mnt/home/llorente/comp_structure_research/stellar_mass_fraction/bigbox_25Mpc/rockstar_halos"
-n_nodes = 1
-n_procs = 8
-n_readers = 8
+outbase = f"{os.getenv('DATA_DIR')}/rockstar_halos"
 
-enzo_dir = '/mnt/home/llorente/cosmo_bigbox/25Mpc_512'
+# TODO: Figure out how to get this bullshit working across multiple nodes
+#       in a parameterizable way
+n_nodes = 1
+n_procs = int(os.getenv('NPROCS'))
+n_readers = n_procs
+
+enzo_dir = os.getenv('ENZO_DIR')
 
 # Create file with parameter files, sorted by time.
-pfs_file = "/mnt/home/llorente/comp_structure_research/stellar_mass_fraction/bigbox_25Mpc/pfs.dat"
+pfs_file = f"{os.getenv('DATA_DIR')}/pfs.dat"
+
+print(f"""
+Running prep_rockstar with the following settings:
+Output directory : {outbase}
+Num procs : {n_procs}
+Enzo dir : {enzo_dir}
+pfs file : {pfs_file}
+""")
 
 es = yt.simulation(sys.argv[1], "Enzo", find_outputs=True)
 es.parameters['GlobalDir'] = enzo_dir

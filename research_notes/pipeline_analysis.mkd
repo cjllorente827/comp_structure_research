@@ -1,0 +1,26 @@
+# Pipeline Analysis
+
+Analysis pertaining to the functionality/performance of the halo analysis pipeline code I'm writing
+
+## Results of last scaling test run
+
+Run around December 7, 2020
+
+![scaling_test_results.png](imgs/scaling_test_results.png)
+
+
+## Pipeline structure
+
+### Top-level directory
+
+Contains: 
+    - scripts required to launch jobs
+    - directories containing extracted/processed data for specific datasets
+    - directories containing code for particular analyses
+    - src directory for code required to run top-level jobs
+        - Configuring rockstar
+        - Running rockstar
+        - Extracting halo catalog data into pickle objects
+        - Universal functions (particle filters, other filters)
+        - Utilities (
+ --> 

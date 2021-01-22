@@ -13,3 +13,5 @@ rockstar_halos/*
 *ipynb_checkpoints*
 */\.ipynb_checkpoints/*
 *__pycache__*
+bigbox_25Mpc/data/*
+bigbox_25Mpc/imgs/*

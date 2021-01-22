@@ -1,15 +1,32 @@
+#!/bin/bash 
 
-NPROCS=2
+#####################################################
+# Main pipeline script for general analysis
+#
+# Arguments
+# {1} - Parameter file that sets values required for
+#       the script to run
+#####################################################
+
+
+#SBATCH -A galaxies
+#SBATCH --time=00:30:00             
+#SBATCH --nodes=1                 
+#SBATCH --ntasks=16
+#SBATCH --cpus-per-task=1
+#SBATCH --mem-per-cpu=10G            
+#SBATCH --job-name gen-analysis-pipeline
+
+export PATH=/mnt/home/llorente/yt-conda/bin:$PATH
+
 
 MPI_ARGS="--mca orte_base_help_aggregate 0"
 
-SQUIRREL=parallel_halo_inspection_proto.py
-
-HOME="/mnt/home/llorente"
-ENZO_DATASET="${HOME}/cosmo_bigbox/25Mpc_512/RD0265/RD0265"
-HALO_DATASET="${HOME}/comp_structure_research/bigbox_25Mpc/data/halodata_RD0265.pkl"
-OUTPUT_DIR="${HOME}/comp_structure_research/bigbox_25Mpc/data"
+# Read in the parameter file (a shell script that just sets values)
+source ${1}
 
 
+srun -n ${NPROC} python ${SQUIRREL} ${ENZO_DATASET} ${HALO_DATASET} -o ${OUTPUT_DIR} > pipeline.out 2>&1
 
-mpirun -np ${NPROCS} ${MPI_ARGS} python ${SQUIRREL} ${ENZO_DATASET} ${HALO_DATASET} -o ${OUTPUT_DIR} > pipeline.out
+echo "Output directory currently using:" >> pipeline.out
+du -h ${OUTPUT_DIR} >> pipeline.out
