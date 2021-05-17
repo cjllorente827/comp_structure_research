@@ -1,0 +1,89 @@
+# Task List
+
+<details>
+  <summary>Tasks</summary>
+
+ * Make ReText look good
+
+ * Start building an annotated bibliography of papers I've reviewed. 
+``` 
+Include citation from ADS
+First Author
+Title
+What's the paper about?
+What did I find interesting about it?
+```
+
+ * <s>Create small simulation dataset to test analysis scripts on</s>
+ * <s>Install Enzo-E and run a test problem</s>
+
+ * Create analysis scripts for measuring bulk halo properties over time and compare to observed relations
+    * SMHM 
+    * Stellar mass-metallicity
+    * SFR
+    * comoving SFR density for entire box (cm solar masses /yr /Mpc^3) (Madau plot)
+        * expect 25Mpc box to start forming stars earlier than 50Mpc due to higher res 
+    * instantaneous SFR(HM) or sSFR(HM), 100 Myr is a reasonable time window
+    * z = 0.0, 0.5, 1, 2 ,3
+    * plot boxes on top of each other and separately
+ * Run the full analysis pipeline on the 50 Mpc box to determine which pieces are still missing and which remnants of the old code can be deleted. 
+     * Finish prep_rockstar script
+     * Create Rockstar halo catalog
+     * Extract HaloData object from catalog
+     * Run general analysis to get halo files (as yt data objects)
+     * Extract cosmological parameters from Enzo dataset
+     * Use only yt data objects and extracted data to generate density, temperature, metallicity and stellar density projections for the largest halo in the 50 Mpc box. 
+</details>
+
+# Research Journal
+
+<details>
+  <summary>**Feedback lit review** :: May 17, 2021 </summary>
+Had a thought today about putting together a literature review on various implementations of feedback in cosmological simulations, including stellar and AGN and possibly extending that to other forms of feedback. I'm not yet sure if one exists, but if it doesn't, I think it would be useful to have a catalog of each implementation
+</details>
+
+<details>
+  <summary>**Small dataset locations** :: May 12, 2021 </summary>
+
+There are some small datasets located here:
+```
+/mnt/research/galaxies-REU/sims/cosmological
+
+/mnt/research/galaxies-REU/sims/cosmological/set1_LR/halo_008508
+```
+</details>
+
+<details>
+  <summary>**Create small dataset?** :: May 11, 2021</summary>
+
+
+My plan is to find a large-ish halo somewhere in the box and create a small, self-contained enzo dataset with just that halo in it in order to use it for testing and development of the analysis scripts. 
+
+The halo is located at: (8.0610406457, 2.4584074068, 0.010386918839) Mpc
+
+Virial radius: \( 6.5 \times 10^9 \) kpc
+
+Stellar Mass: \( 6.5 \times 10^9 M_{\odot}\)
+
+Dataset size : 128 kB
+
+Dataset fraction (% of full dataset): \( 1.0 \times 10^{-4} \)
+
+
+Code to reproduce located at 
+```
+comp_structure_research/general_analysis/inspect_ds.py
+
+```
+
+(picture maybe)
+
+  
+### Initial post
+This is an initial entry into the research journal just to create an example for how this works. I don't expect to update this every day, necessarily, but I want to try to keep this journal of my thoughts and experiences as well as some short summaries of some of the papers I read. 
+
+</details>
+
+# Project Ideas
+
+  * Is there an existing review of stellar/AGN feedback models in cosmological simulation codes and if not, would it be worthwhile to do a literature review to catalog/analyze/compare them?

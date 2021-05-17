@@ -18,6 +18,16 @@ module load OpenMPI/2.1.2
 module load HDF5/1.10.1
 
 #######################################################
+# MPI settings
+#######################################################
+MPI_ARGS="--mca orte_base_help_aggregate 0 "
+
+#######################################################
+# Source files
+#######################################################
+PREP_ROCKSTAR=${HOME}/comp_structure_research/src/prep_rockstar.py
+
+#######################################################
 # Function definitions
 #######################################################
 
@@ -55,53 +65,53 @@ function run_rockstar {
     while [ ! -e rockstar_halos/auto-rockstar.cfg ]; do
 	sleep 1
     done
-    mpirun --mca btl ^tcp --oversubscribe -n $NPROCS ./rockstar-galaxies -c rockstar_halos/auto-rockstar.cfg >& client.out
+    mpirun --mca btl ^tcp --oversubscribe -n $APL_NUM_PROCS ./rockstar-galaxies -c rockstar_halos/auto-rockstar.cfg >& client.out
 
 }
 
 # Ensure directories exist
-[ ! -d ${DATA_DIR} ] && mkdir ${DATA_DIR}
-[ ! -d ${PLOT_DIR} ] && mkdir ${PLOT_DIR}
+[ ! -d ${APL_DATA_DIR} ] && mkdir ${APL_DATA_DIR}
+[ ! -d ${APL_PLOT_DIR} ] && mkdir ${APL_PLOT_DIR}
 
-if [ "${START_FROM_STAGE}" -lt 1 ]
+if [ "${APL_START_FROM_STAGE}" -lt 1 ]
 then
-    cd ${DATA_DIR}
-    python ${HOME}/comp_structure_research/src/prep_rockstar.py
+    cd ${APL_DATA_DIR}
+    mpirun -np ${APL_NUM_PROCS} ${MPI_ARGS} python ${PREP_ROCKSTAR} 
 
-    [ ${RUN_TO_END} -eq 0 ] && exit 0
+    [ ${APL_RUN_TO_END} -eq 0 ] && exit 0
 fi
 
-if [ "${START_FROM_STAGE}" -lt 2 ]
+if [ "${APL_START_FROM_STAGE}" -lt 2 ]
 then
     echo 'run_rockstar()'
 
-    [ ${RUN_TO_END} -eq 0 ] && exit 0
+    [ ${APL_RUN_TO_END} -eq 0 ] && exit 0
 fi
 
-if [ "${START_FROM_STAGE}" -lt 3 ]
+if [ "${APL_START_FROM_STAGE}" -lt 3 ]
 then
     echo 'extract_halo_data()'
 
-    [ ${RUN_TO_END} -eq 0 ] && exit 0
+    [ ${APL_RUN_TO_END} -eq 0 ] && exit 0
 fi
 
-if [ "${START_FROM_STAGE}" -lt 4 ]
+if [ "${APL_START_FROM_STAGE}" -lt 4 ]
 then
     echo 'run_analysis()'
 
-    [ ${RUN_TO_END} -eq 0 ] && exit 0
+    [ ${APL_RUN_TO_END} -eq 0 ] && exit 0
 fi
 
-if [ "${START_FROM_STAGE}" -lt 5 ]
+if [ "${APL_START_FROM_STAGE}" -lt 5 ]
 then
     echo 'make_plots()'
 
-    [ ${RUN_TO_END} -eq 0 ] && exit 0
+    [ ${APL_RUN_TO_END} -eq 0 ] && exit 0
 fi
 
 
 
-# MPI_ARGS=--mca orte_base_help_aggregate 0 
+
 
 # mpirun -np ${NPROCS} ${MPI_ARGS} python ${SQUIRREL} ${ENZO_DATASET} ${HALO_DATASET} ${OUTPUT_DIR}
 

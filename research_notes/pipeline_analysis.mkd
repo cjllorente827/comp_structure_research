@@ -11,14 +11,45 @@ Run around December 7, 2020
 
 ## Pipeline structure
 
+<details>
+
 ### Top-level directory
 
-Contains: 
-    - scripts required to launch jobs
-    - directories containing extracted/processed data for specific datasets
-    - directories containing code for particular analyses
-    - src directory for code required to run top-level jobs
-        - Configuring rockstar
-        - Running rockstar
-        - Extracting halo catalog data into pickle objects
-        - Universal functions (particle filters, other filters)
+Contains:
+
+ * scripts required to launch jobs
+ * directories containing extracted/processed data for specific datasets
+ * directories containing code for particular analyses
+ * src directory for code required to run top-level jobs
+    * Configuring rockstar
+    * Running rockstar
+    * Extracting halo catalog data into pickle objects
+    * Universal functions (particle filters, other filters)
+
+</details>
+
+## Pipeline Functions
+
+<details>
+
+### Configuring Rockstar
+
+Configuring rockstar to run natively (i.e. outside of yt) requires the creation of a `pfs.dat` file that contains the (relative) file names of each of the Enzo outputs in a given time series. It must also create a `rockstar.cfg` file containing a number of different settings, such as minimum particle mass, that require reading in the full dataset. For large datasets this can take a while, so its suggested to run this script in parallel.
+
+The script used to work from a `rockstar_base.cfg` file that contained the following default settings:
+
+```
+OVERLAP_LENGTH = 0.1
+FILE_FORMAT = ENZO
+OUTPUT_FORMAT = BINARY
+PARALLEL_IO = 1
+FORK_READERS_FROM_WRITERS = 1
+DELETE_BINARY_OUTPUT_AFTER_FINISHED = 0
+FULL_PARTICLE_CHUNKS = 1
+MIN_HALO_OUTPUT_SIZE = 100
+MASS_DEFINITION = vir
+```
+
+But now it simply has these lines hardcoded into the script itself, with the exception of the `MIN_HALO_OUTPUT_SIZE` parameter which is set by the script.
+
+</details>

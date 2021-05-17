@@ -1,0 +1,64 @@
+# 25 Mpc big box simulation analysis
+
+<details>
+<summary>General analysis</summary> <blockquote>
+
+<details>
+<summary>Full box at \(z = 0\)</summary>
+
+![25Mpc_projected_density](imgs/25Mpc_projected_density.png){ width=75% }
+![25Mpc_projected_temp_weighted_density](imgs/25Mpc_projected_temp_weighted_density.png){ width=75% }
+![25Mpc_projected_metal_weighted_density](imgs/25Mpc_projected_metal_weighted_density.png){ width=75% }
+</details>
+
+<details>
+<summary>Individual halo inspection</summary>
+## 
+
+![inspect_halo_log_sm_12](imgs/inspect_halo_log_sm_12.png)
+![inspect_halo_log_sm_10](imgs/inspect_halo_log_sm_10.png)
+![inspect_halo_log_sm_9](imgs/inspect_halo_log_sm_9.png)
+</details>
+
+ </blockquote></details>
+
+<details>
+<summary>Stellar Mass Halo Mass Relation</summary>
+![25Mpc_z_0-2_Behroozi_2013_compare](imgs/25Mpc_z_0-2_Behroozi_2013_compare.png)
+</details>
+
+<details>
+<summary>Stellar Mass Metallicity Relation</summary>
+
+![Z_Zsun_25Mpc_z_0_2](imgs/Z_Zsun_25Mpc_z_0_2.png)
+
+[Behroozi 2019](https://arxiv.org/pdf/1806.07893.pdf) offers this fit function for the SMM relation over cosmic time.
+
+![Behroozi_2015_SMM_over_cosmic_time](imgs/Behroozi_2015_SMM_over_cosmic_time.png)
+
+They also set a lower metallicity floor of \(log_{10}(Z/Z_{\odot}) = -1.5 \) to "avoid unphysically low metallicities at high redshifts and low stellar masses". **Might be good to ask Brian about this as \(Z/Z_{\odot} \approx 0.03 \) at high redshift/low stellar mass doesn't seem all that low to me.**
+
+Behroozi gets this fit function from [Maiolino 2008](https://www.aanda.org/articles/aa/pdf/2008/35/aa09678-08.pdf) which measures metallicity in units of \(12 + \log[O/H] \). **Ask Brian about converting from this to solar metallicity.**
+
+Currently using the Oxygen fraction of the Sun listed in [Asplund 2005](http://articles.adsabs.harvard.edu/pdf/2005ASPC..336...25A) to convert to solar metallicity.
+
+![Maiolino_2008_SMM_cosmic_time_eq](imgs/Maiolino_2008_SMM_cosmic_time_eq.png)
+
+![Maiolino_2008_SMM_cosmic_time_fig](imgs/Maiolino_2008_SMM_cosmic_time_fig.png)
+
+
+Voit 2015 for comparison
+
+![Voit_2015_SM_Z_fig](imgs/Voit_2015_SM_Z_fig.png)
+
+</details>
+
+<details>
+<summary>Star Formation Rates</summary>
+
+![25Mpc_sSFR_halo_w_log_sm_12](imgs/25Mpc_sSFR_halo_w_log_sm_12.png)
+![25Mpc_sSFR_halo_w_log_sm_10](imgs/25Mpc_sSFR_halo_w_log_sm_10.png)
+![25Mpc_sSFR_halo_w_log_sm_9](imgs/25Mpc_sSFR_halo_w_log_sm_9.png)
+
+
+</details>

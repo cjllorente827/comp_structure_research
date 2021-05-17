@@ -5,8 +5,9 @@
 
 import sys
 import numpy as np
+import pdb
 HOME='/mnt/home/llorente/'
-sys.path.append(HOME+'comp_structure_research')
+sys.path.append(HOME+'comp_structure_research/src')
 sys.path.append(HOME+'comp_structure_research/stellar_mass_fraction')
 
 import yt
@@ -14,8 +15,7 @@ yt.enable_parallelism()
 
 from HaloData import *
 
-ts = yt.load(f'{HOME}/cosmo_bigbox/25Mpc_512/RD????/RD????')
-
+ds = yt.load(f'{HOME}/cosmo_bigbox/25Mpc_512/RD0265/RD0265')
 
 def DarkMatter(pfilter, data):
     filter = data[("all", "particle_type")] == 1 # DM = 1, Stars = 2
@@ -32,37 +32,46 @@ yt.add_particle_filter("stars", function=stars, filtered_type='all', \
                        requires=["particle_type"])
 
 
-
-def inspect_fields(ds):
-    if yt.is_root():
-        for f in ds.field_list:
-            print(f)
-
-        print()
-
-        for df in ds.derived_field_list:
-            print(df)
-# end inspect_fields
-
 halo_dat_fname =\
-    f"{HOME}/comp_structure_research/stellar_mass_fraction/bigbox_25Mpc/halodata_RD0111.dat"
+    f"{HOME}/comp_structure_research/bigbox_25Mpc/halodata_RD0265.dat"
 
 hd = HaloData.load_from_file(halo_dat_fname)\
-             .filter_by(Fields.TOT_MASS, greater_than, 1e10)\
-             .filter_by(Fields.NUM_STAR_PARTICLES, greater_than, 10)
+             .filter_by(Fields.STR_MASS, greater_than, 1e11)
 
 
-for ds in ts:
-    ds.add_particle_filter('stars')
+ds.add_particle_filter('stars')
 
-    domain = ds.domain_width.to('Mpc')
-    halo_data = hd.halos[0]
-    halo_pos = (halo_data[Fields.XPOS], halo_data[Fields.YPOS], halo_data[Fields.ZPOS])
-    halo_rad = halo_data[Fields.RADIUS]
-    halo = ds.sphere(halo_pos, halo_rad)
+domain = ds.domain_width.to('Mpc')
+halo_data = hd.halos[0]
+domain = ds.domain_width.to('Mpc').value
+halo_data = hd.halos[0]
+halo_pos = (halo_data[Fields.XPOS], halo_data[Fields.YPOS], halo_data[Fields.ZPOS])/domain
+halo_rad = halo_data[Fields.RADIUS]/domain[0]
+halo_sm = halo_data[Fields.STR_MASS]
+halo_tm = halo_data[Fields.TOT_MASS]
+halo = ds.sphere(halo_pos, halo_rad)
+
+fields_to_save = [
+    ("gas", "density"),
+    ("stars", "particle_mass"),
+    ("stars", "creation_time")
+]
+
+halo.save_as_dataset(filename="Single_halo_z0", fields=fields_to_save)
+
+p = yt.ProjectionPlot(ds, "z", ("enzo", "Density"), data_source=halo)
+p.set_center(halo_pos)
+p.set_width(2*halo_rad)
+p.save()
+
+print(f"""
+Halo position: {halo_pos} 
+Halo rad: {halo_rad:2e}
+Halo stellar mass: {halo_sm:2e}
+Halo total mass: {halo_tm:2e}
+""")
 
 
-    print(ds.fields.stars.metallicity_fraction)
-    break
+
 
 
