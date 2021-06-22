@@ -1,0 +1,100 @@
+# Notes on [*Theoretical Challenges in Galaxy Formation* (Naab & Ostriker 2017)](https://www.annualreviews.org/doi/pdf/10.1146/annurev-astro-081913-040019)
+
+### Authors:
+Thorsten Naab & Jeremiah P. Ostriker
+
+### What's the paper about?
+
+The paper starts from basic observational data and then builds up the process by which simulations and models are created. It also includes an excellent overview of stellar feedback models in cosmological simulations.
+
+They first mention dark matter only simulations, which are then extended by semi-analytic models. These models have been reviewed "extensively" in [Somerville & Dave (2015)](https://www.annualreviews.org/doi/pdf/10.1146/annurev-astro-082812-140951).
+
+The first 3d hydro simulations including self-gravity used the [Smooth Particle Hydrodynamics (SPH)](https://abaqus-docs.mit.edu/2017/English/SIMACAEANLRefMap/simaanl-c-sphanalysis.htm) technique. This technique is relatively simple to implement but has limitations regarding shocks, large temperature gradients, mixing, and subsonic turbulence. 
+
+Examples of SPH codes:
+
+[PHANTOM](https://phantomsph.bitbucket.io/)
+[(paper)](https://arxiv.org/pdf/1702.03930.pdf)
+
+[GADGET](https://wwwmpa.mpa-garching.mpg.de/gadget/)
+[(paper)](https://wwwmpa.mpa-garching.mpg.de/gadget/gadget1-paper.pdf)
+
+[GASOLINE](https://gasoline-code.com/)
+[(paper)](https://arxiv.org/pdf/1707.03824.pdf)
+
+
+In constrast to SPH codes, there are Eulerian (SPH codes are Lagrangian) codes that typically perform better on mixing and shock problems. 
+
+Examples of Eulerian hydro codes:
+
+[ENZO!]()
+[(paper)]()
+
+[FLASH]()
+[(paper)]()
+
+[RAMSES]()
+[(paper)]()
+
+[ATHENA]()
+[(paper)]()
+
+There are also codes outside this binary:
+
+[AREPO](https://arepo-code.org/)
+[(Illustris)](https://www.illustris-project.org/about/#astronomers)
+[(paper)](https://arxiv.org/pdf/1909.04667.pdf)
+
+[GIZMO (FIRE-2)](https://fire.northwestern.edu/about-fire/)
+[(paper)](https://arxiv.org/pdf/1409.7395.pdf)
+
+### What did I find interesting?
+
+This paper characterizes different cosmological simulations by type and explains the various pieces of each one and how they build up to a whole. 
+
+These paragraphs in particular are interesting to me:  
+![image0001](imgs/image0001.png){ width=720px }
+
+The papers mentioned here are definitely worth investigating. 
+
+![image0002](imgs/image0002.png){ width=720px }
+
+Definition of a subresolution (subgrid?) model.
+
+![image0003](imgs/image0003.png){ width=720px }
+
+Potentially good papers to look for an overview of relevant galactic properties for judging the output of cosmological simulations.
+
+
+### Overview of Stellar Feedback Models
+
+| Model       | Description | Example Paper |
+| ----------- | ----------- | ----------- |
+| Delayed Cooling Model      | SN energy is injected into gas, but cooling is turned off for gas inside the expected Sedov blast wave.       |  [Thacker & Couchman 2000](https://arxiv.org/pdf/astro-ph/0001276.pdf)     |
+| Stochastic Thermal Feedback   | Mean thermal energy injection per unit formed stellar mass is fixed. Neighboring star particles are heated IFF their temperatures can be moved above a certain temperature threshold.        |[Dalla Veccia & Schaye 2012](https://arxiv.org/pdf/1203.5667.pdf)|
+|Two-phase approach|Hot and cold gas are evolved separately with SPH. SN energy is decoupled from hydro and only released (recoupled?) when it can become a constituent of the hot phase.|[C. Scannapieco et al. 2006](https://cds.cern.ch/record/933843/files/0603174.pdf)|
+|Wind Feedback|A fraction of energy released by massive stars is injected into surrounding gas as energy or momentum that drives it away from the star-forming region.|[Oppenhiemer & Dave 2006](https://arxiv.org/pdf/astro-ph/0605651.pdf)|
+
+
+
+
+### Citation:
+```
+@ARTICLE{2017ARA&A..55...59N,
+       author = {{Naab}, Thorsten and {Ostriker}, Jeremiah P.},
+        title = "{Theoretical Challenges in Galaxy Formation}",
+      journal = {\araa},
+     keywords = {Astrophysics - Astrophysics of Galaxies},
+         year = 2017,
+        month = aug,
+       volume = {55},
+       number = {1},
+        pages = {59-109},
+          doi = {10.1146/annurev-astro-081913-040019},
+archivePrefix = {arXiv},
+       eprint = {1612.06891},
+ primaryClass = {astro-ph.GA},
+       adsurl = {https://ui.adsabs.harvard.edu/abs/2017ARA&A..55...59N},
+      adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+```

@@ -1,0 +1,12 @@
+\begin{thebibliography}{1}
+\expandafter\ifx\csname natexlab\endcsname\relax\def\natexlab#1{#1}\fi
+
+\bibitem[{{Naab} \& {Ostriker}(2017)}]{2017ARA&A..55...59N}
+{Naab}, T. \& {Ostriker}, J.~P. 2017, \emph{Annu. Rev. Astron. Astrophys.}, 55,
+  59
+ \begin{quotation}\noindent The paper starts from basic observational data and
+  then builds up the process by which simulations and models are created. It
+  also includes an excellent overview of stellar feedback models in
+  cosmological simulations. \end{quotation}
+
+\end{thebibliography}

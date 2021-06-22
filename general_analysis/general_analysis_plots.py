@@ -7,7 +7,7 @@ from universal import *
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
-from HaloData import Fields, HaloData, to_YTRegion
+from HaloData import Fields, HaloData, to_YTRegion, apply_reduction
 from matplotlib.animation import FuncAnimation
 from mpl_toolkits.axes_grid1 import AxesGrid, make_axes_locatable
 from tqdm import tqdm
@@ -61,34 +61,62 @@ def inspect_halo(ds, halo, zoom=2):
         
     plt.show()
 
-def metallicity_vs_stellar_mass(hd, z):
 
-    hd = hd.filter_by(Fields.NUM_STAR_PARTICLES, greater_than, 10)\
-           .filter_by(Fields.TOT_MASS, greater_than, 1e9)
+
+##################################################################
+# Empirical fit function for the Stellar Mass Metallicty relation
+# over cosmic time in units of solar masses and solar metallicities
+#
+# Adapted from Behroozi 2019
+# originally developed in Maiolino 2008
+# Behroozi mentions setting a lower metallicity floor at
+# log Z = -1.5 to avoid unphysical metallicities
+# This might need to be implemented here as well
+##################################################################
+def Behroozi_metallicity(M_star, z):
+    M0 = 10**(11.22 + 0.47*z)
+    K0 = 9.07 - 0.07 * z
+    log_OH_12 = K0 - 0.086 * ( np.log10(M_star/M0)**2 ) # log(O/H) + 12
+
+    # convert to solar metallicity (I hope)
+    Z = log_OH_12 - 8.66
+    Z[Z < 10**(-1.5)] = 10**(-1.5)
+    return Z
+
+def Voit_metallicity(M_star):
+    return (M_star * 1e-11)**(0.4)
     
-    reduced_data = apply_reduction(hd, Fields.STR_MASS, Fields.STR_METAL_FRAC, \
+
+def metallicity_vs_stellar_mass(hd_list, z_list):
+
+    fig, ax = plt.subplots(1,1,figsize=(8,7))
+
+    colors = plt.cm.viridis(np.linspace(0, 1,len(hd_list)+1 ))
+    
+
+    for hd, z, color in zip(hd_list, z_list, colors):
+    
+        reduced_data = apply_reduction(hd, Fields.STR_MASS, Fields.STR_METAL_FRAC, \
                                    np.median, bin_scale='log')
 
-    sm, median_mf = reduced_data
+        sm, median_Z = reduced_data
+        fit = Behroozi_metallicity(sm, z)
 
-    Z_approx = lambda M : (M/1e11)**(0.4)
-    
-    fig, ax = plt.subplots(1,1,figsize=(7,7))
+        if z == 0.:
+            ax.loglog(sm, Voit_metallicity(sm), c='k', label='Voit 2015', linestyle=':')
 
-    # stellar mass
-    ax.plot(sm, median_mf, label='Z')
-    ax.plot(sm, Z_approx(sm), label='Voit 2015 approximation')
+        ax.loglog(sm, median_Z, label=f'$z = {z}$', c=color)
+        ax.loglog(sm, fit, linestyle='--', c=color)
+        ax.set(
+            ylabel=r'$Z (Z_\odot$)',
+            xlabel=r'$M_* (M_\odot)$'
+#            ylim=(1e-3, 3)
+        )
+    # end for hd, z
 
-    ax.set_xscale('log')
-    ax.set_yscale('log')
-
-    #ax.set_ylim(1e-3, 3e1)
-
-    ax.set_ylabel('Z ($Z_\odot$)')
-    ax.set_xlabel('$M_* (M_\odot)$')
     ax.legend(loc='best')
     
-    plt.title(f'Stellar Metallicity vs. Stellar Mass for massive halos at $z={z}$')
+    plt.title(f'Stellar Metallicity vs. Stellar Mass for massive halos')
     plt.show()
 
 def plot_halo_ssfr(ds, halo, guess=[1,-1]):

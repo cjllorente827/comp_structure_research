@@ -1,0 +1,103 @@
+# Useful Code snippets
+
+
+<details>
+<summary>Allocate interactive job on hpcc</summary>
+
+```
+salloc -N 1 -n 16 -A galaxies --time=8:00:00 --mem-per-cpu=16G --x11
+```
+</details>
+
+<details>
+<summary>Basic boilerplate for standalone script </summary>
+
+```
+from time import time
+import sys
+if len(sys.argv) != N:
+    print("""
+Usage: python ...
+""")
+
+    sys.exit()
+#end if
+
+def main():
+    pass
+
+if __name__ == "__main__":
+    start = time()
+    main()
+    elapsed = time() - start
+
+    print(f"""
+Operation took: {elapsed} seconds
+""")
+
+```
+</details>
+
+<details>
+<summary>matplotlib boilerplate </summary>
+
+```
+import matplotlib.pyplot as plt
+import numpy as np
+from astropy import units as u
+from astropy import constants as const
+import sympy as sym
+plt.rcParams.update({'font.size': 14})
+
+row, col = 1,1
+fig, ax = plt.subplots(row,col, figsize=(8*col,7*row))  
+ax.plot(x,y)
+ax.set(
+        title='chart',
+        ylim=(0, 1),
+        xlim=(0, 1),
+        xlabel="x",
+        ylabel="y")
+ax.legend()
+if 1 in plot_list:
+        plt.show()
+fig.savefig('Fig1.png')
+plt.close()
+
+```
+
+</details>
+
+<details>
+<summary>Convert a bunch of Jupyter notebooks to pdf </summary>
+```
+jupyter nbconvert --to PDF --allow-errors --execute *.ipynb --ExecutePreprocessor.timeout=300 --ExecutePreprocessor.interrupt_on_timeout="True"
+```
+</details>
+
+<details>
+<summary>Greek letters in python </summary>
+
+```
+# Δ
+# Ω
+# Λ
+# Φ
+# π
+# θ
+# λ
+# ω
+# ρ
+# σ
+# τ
+# χ
+# ψ
+# α
+# β
+# γ
+```
+
+</details>
+
+
+

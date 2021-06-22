@@ -1,0 +1,232 @@
+# Current Tasks
+
+### Make a movie to feel better about yourself
+
+- Make it a 6x4 for each field along with a tracker at the bottom to see where we are in the space
+- <span style="color:#04e022">Try out the script with more cores and more memory per core</span> Seems to work pretty damn well
+- Try changing the code to use `set_data` instead of replotting
+- Need to run a memory profiler, possibly [this one](https://pypi.org/project/memory-profiler/) because we're running out of memory when running the script on big box on the compute nodes. 
+- Run the damn thing for real
+
+### Do some research for your feedback talk
+
+
+# Task List
+
+ * Create analysis scripts for measuring bulk halo properties over time and compare to observed relations
+    * SMHM 
+    * Stellar mass-metallicity
+    * SFR
+    * comoving SFR density for entire box (cm solar masses /yr /Mpc^3) (Madau plot)
+        * expect 25Mpc box to start forming stars earlier than 50Mpc due to higher res 
+    * instantaneous SFR(HM) or sSFR(HM), 100 Myr is a reasonable time window
+    * Phase plots: Density v Temp weighted by cell mass, KEntropy vs Pressure, over-density(baryon density or cell_mass / baryon crit density) vs metallicity
+      - whole box
+      - pick some good halos
+    * Projections: Density, mass-weighted temp, mass-weighted metallicity, stellar density
+    * Sensible choice for dL is scale of objects we expect to see (around 200 kpc) 
+    * z = 0.0, 0.5, 1, 2 ,3
+    * plot boxes on top of each other and separately
+ * Run the full analysis pipeline on the 50 Mpc box to determine which pieces are still missing and which remnants of the old code can be deleted. 
+     * Finish prep_rockstar script
+     * Create Rockstar halo catalog
+     * Extract HaloData object from catalog
+     * Run general analysis to get halo files (as yt data objects)
+     * Extract cosmological parameters from Enzo dataset
+     * Use only yt data objects and extracted data to generate density, temperature, metallicity and stellar density projections for the largest halo in the 50 Mpc box. 
+
+
+# Research Journal
+<details>
+  <summary><i>Progress on the thin projection step through </i>:: June 18, 2021 </summary>
+  Made this with the small dataset
+
+![Alt text](general_analysis/RD0042_density_walkthrough_5fps.gif)
+
+
+
+</details>
+<details>
+  <summary><i>One thing to look for when running yt code</i>:: June 18, 2021 </summary>
+Pay attention to how much yt defers execution of certain actions and which actions get deferred. It almost feels like yt is gun-shy when it comes to actually doing any valuable work, and this makes the code feel like it has performance anxiety. 
+
+Another thing that might be interesting is seeing where yt <i>doesn't</i> defer execution and what implications that has.
+</details>
+<details>
+  <summary><i>yt.enable_parallel() bug</i>:: June 14, 2021 </summary>
+
+  Honestly fuck yt. Running serially with a call yt.enable_parallel() on the hpcc amr nodes causes the program to hang indefinitely instead of just switching to serial mode. No idea why and don't really care to look into it. 
+  </details>
+
+
+<details>
+  <summary><i>Work on the thin projection movie</i>:: June 10, 2021 </summary>
+So I can already tell that this is gonna take a great deal of care on my part. yt <i>clearly</i> does not have the capacity to handle this task well. Here's why:
+
+The default cookbook approach to this is completely inadequate to the task, even for a small dataset. Running it in parallel causes it to attempt to access an address outside of its memory. Running it serially does not cause the same issue. It could just be that I need to allocate more memory per cpu. <span style="color:#04e022">I'll test it with more memory and less processes and see how that goes. I can also test it with a smaller number of frames since it seems to die around 30-ish.</span>
+
+The bigger issue is that the actual projection code, the bit that's actually supposed to run in parallel, doesn't get called until the `animation.save()` function gets called, which, naturally, also has to be the function that makes a subprocess call to convert the images it creates into a .gif. Running the test mentioned above should determine if the subprocess call running in parallel is causing the issues I saw.
+
+<b>Workaround ideas:</b>
+
+Override yt's parallelism with manual mpi4py code while still taking advantage of yt's projection capabilities. This method manually creates temp png files and then stitches them together with a manual subprocess call to ImageMagick at the end. 
+
+<span style="color:#04e022">Update:</span> It's probably not necessary to completely override yt's parallelism, but is definitely necessary to workaround the default `animation.save()` approach listed on their website because that does <i>not</i> play nice with yt's parallelism. This was confirmed by asking it to output a small number of frames and watching where the script died, which always occurred at the subprocess call. Obvious easy answer is have yt save the gifs and do the subprocess call manually in serial. It's a bit of extra work, but doesn't require completely re-doing the parallelism. 
+
+<span style="color:#04e022">Update part deux:</span> So there's some bullshit where if the code runs for too long it errors out with a bus error saying it passed a bad pointer. Turning on garbage collection and trying to reduce the memory footprint doesn't seem to do shit so the workaround I've found is to just restart the script from halfway through which is easy to parameterize. 
+
+
+</details>
+<details>
+  <summary><i>More thoughts about yt</i>:: June 9, 2021 </summary>
+  Another issue with yt is how it's documentation is designed like a cookbook rather than actual code documentation. The cookbook style of documentation just tells you how to perform a single task, and if the task you want is sufficiently similar to that then good for you, but you're fucked if you need to stray further than that. This is because yt doesn't tell you what's actually going on or instruct you in how to really use it. It just shows you how some things can be done. Like for real, I cannot for the life of me find documentation on how ds.r[] region selection works. I know it's in there, but since its part of some random fucking recipe in their wayy-too-fucking-long cookbook I will never find it until one day when I'm looking for something completely different. So I guess I just have to guess how the slicing works and hope to guess it right.
+
+  Seriously look at this fucking shit
+
+  From the Time Series Movie code
+  ```
+def animate(i):
+    ds = ts[i]
+    plot._switch_ds(ds)
+  ```
+
+  The animate code calls a private function known only to yt's internals and therefore isn't fucking documented anywhere. So I need to do something similar, which is switch the data source, but that doesn't seem to be a public method available and documented, so now I gotta look through the source to figure out what the fuck I gotta use to do this. 
+
+  Lol, the answer is to do this 
+
+```
+    plot._switch_ds(ds, data_source=new_data_source)
+  ```
+  Luckily I'm doing projections and not slices cuz apparently this is only defined for projections.
+
+</details>
+
+<details>
+  <summary><i>Notes from meeting with Brian</i> :: June 9, 2021 </summary>
+  Make movies of thin projections and look at IC directory
+
+</details>
+
+<details>
+  <summary><i>Notes from meeting with Brian</i> :: June 2, 2021 </summary>
+Read papers:
+
+ - [Illustris](https://ui.adsabs.harvard.edu/abs/2018MNRAS.473.4077P/abstract)
+ - [FIRE](https://ui.adsabs.harvard.edu/abs/2018MNRAS.480..800H/abstract)
+ - [ENZO](https://ui.adsabs.harvard.edu/abs/2020MNRAS.497.5203O/abstract)
+ - [Agora](https://ui.adsabs.harvard.edu/abs/2016ApJ...833..202K/abstract)
+ - [AGN](https://ui.adsabs.harvard.edu/abs/2017ApJ...841..133M/abstract)
+</details>
+
+<details>
+  <summary><i>Code Philosophy: Difference between "frameworks" and "libraries"</i> :: May 28, 2021 </summary>
+  
+**Framework**
+: code package that forces the programmer to work exclusively within it, often by wrapping core functionality of other packages within itself and having functions that exclusively return proprietary object classes rather than primitives
+
+**Library**
+: code package that allows the programmer access to extra functionality without forcing the programmer to remain within that package.  These packages are often focused on specific tasks and return code primitives (or objects that act like primitives) allowing for use by other code packages. 
+
+The most important distinction here is the use of primitives. All code within a language understands primitives. They are the lingua franca of any coding language. Any code that refuses (or makes it difficult) to work with primitives will naturally tend towards becoming all-encompassing; because it *has* to be. Because if you can't perform a particular task within that framework, then the developers of that framework *have to* add that functionality into it, because that task cannot be easily performed using the framework and some other code. This is the mechanism that generates scope-creep inside code packages that become frameworks. 
+
+</details>
+
+<details>
+  <summary><i>Does yt really suck that hard?</i> :: May 28, 2021 </summary>
+Yeah, I might just be able to run this code serially on HPCC and have it complete in less time than yt would take to do it in parallel. Certainly less time than it would take to parallelize the code. Still might be worth parallelizing for practice/creating code snippets.
+</details>
+
+<details>
+  <summary><i>Notes from meeting with Brian</i> :: May 26, 2021 </summary>
+  Read Illustris TNG paper and Terrazas dissertation. Investigate KITP CGM workshop materials.
+</details>
+
+<details>
+  <summary><i>yt shenanigans</i> :: May 25, 2021 </summary>
+Ok so had a good look through the yt docs and source code. I am reasonably confident that calculating the SFR of the entire box in parallel in yt requires the creation of a Derived Quantity (as distinct from a Derived Field). The yt docs even mention that Derived Quantity calculation is handled in parallel. It does not say the same for Derived Fields. I am still unclear on what the difference is between a Quantity and Field. The documentation for creating Derived Quantities admits that it has not been updated to work with yt 3.0 and is extremely information-sparse. What information is there, suggests the use of an `add_quantity` function to actually work with the quantity. Upon inspection, there are two `add_quantity` functions, neither of which are defined within the core yt API. Rather both exist in the yt-astro extension module, which is not particularly well-documented. 
+
+The first `add_quantity` located in `yt_astro_analysis/halo_analysis/halo_catalog/analysis_operators.py` creates an object out of the user-defined function and adds that to some OperatorRegistry object called quantity_registry. The code file does the exact same thing for a callback_registry, filter_registry, and recipe_registry. The distinction between these four categories is not obvious, as they are all created in the exact same manner. Generously, this code looks like a set of stub methods that have to be filled out more. Less generously, this is superfluous code that does the same thing in four different methods for no apparent reason. 
+
+The second `add_quantity` is an instance method of the `AnalysisPipeline` object located within `yt_astro_analysis/halo_analysis/halo_catalog/analysis_pipeline.py`. This method seems more substantial, but also seems to require that the other `add_quantity` function be called first in order to add the quantity to the `quantity_registry` object (but only if there is no data source?). 
+
+Found documentation that describes this process, as well as the intended distinction between filters, quantities, callbacks, and recipes:  
+[yt-astro docs](https://yt-astro-analysis.readthedocs.io/en/latest/halo_catalog.html#quantities)
+
+Summary: 
+
+ - Filters return true or false and operate on a halo catalog
+ - Quantities return numerical values and are stored on the halo object in a dictionary called "quantities"
+ - Callbacks are a superclass for quantities and filters and are general purpose functions that can do anything to a Halo object. Callbacks do not return anything.
+ - Recipes are a series of callbacks, quantities and filters run in succession. 
+
+</details>
+
+<details>
+  <summary><i>Feedback lit review</i> :: May 17, 2021 </summary>
+Had a thought today about putting together a literature review on various implementations of feedback in cosmological simulations, including stellar and AGN and possibly extending that to other subgrid physical models. I'm not yet sure if one exists, but if it doesn't, I think it would be useful to have a catalog of each implementation
+</details>
+
+<details>
+  <summary><i>Small dataset locations</i> :: May 12, 2021 </summary>
+
+There are some small datasets located here:
+```
+/mnt/research/galaxies-REU/sims/cosmological
+
+/mnt/research/galaxies-REU/sims/cosmological/set1_LR/halo_008508/RD0042/RD0042
+```
+</details>
+
+<details>
+  <summary><i>Create small dataset?</i> :: May 11, 2021</summary>
+
+
+My plan is to find a large-ish halo somewhere in the box and create a small, self-contained enzo dataset with just that halo in it in order to use it for testing and development of the analysis scripts. 
+
+The halo is located at: (8.0610406457, 2.4584074068, 0.010386918839) Mpc
+
+Virial radius: \( 6.5 \times 10^9 \) kpc
+
+Stellar Mass: \( 6.5 \times 10^9 M_{\odot}\)
+
+Dataset size : 128 kB
+
+Dataset fraction (% of full dataset): \( 1.0 \times 10^{-4} \)
+
+
+Code to reproduce located at 
+```
+comp_structure_research/general_analysis/inspect_ds.py
+
+```
+
+(picture maybe)
+
+  
+### Initial post
+This is an initial entry into the research journal just to create an example for how this works. I don't expect to update this every day, necessarily, but I want to try to keep this journal of my thoughts and experiences as well as some short summaries of some of the papers I read. 
+
+</details>
+
+# Papers I'm reading
+
+* [*Theoretical Challenges in Galaxy Formation*](https://www.annualreviews.org/doi/pdf/10.1146/annurev-astro-081913-040019)
+    * [Notes](/home/cj/mnt/hpcc-research/feedback_review/Notes_Theoretical_Challenges_in_Galaxy_Formation.mkd)
+* [Examining the black hole feedback model in
+IllustrisTNG](https://arxiv.org/pdf/1906.02747.pdf)
+* [The Aquila comparison Project: The Effects of Feedback
+and Numerical Methods on Simulations of Galaxy
+Formation](https://arxiv.org/pdf/1112.0315.pdf)
+* [KITP Workshop materials](https://online.kitp.ucsb.edu/online/halo21/)
+
+# Project Ideas
+
+ * Visualization project ideas
+     * How far away are we from being able to live render a simulation and at what level of resolution? Applications are outreach through video game-like interaction with simulations and teaching tools
+     * What would it take to render a 3d fly-through inspection of galaxy simulation data? 
+
+### My project ideas are all coming from a place of "I am kind of lost and wish I had something  dumbed down enough to easily understand along with some entertaining visuals to appease my monkey brain." Basically, I want 3Blue1Brown to explain my own research to me. Since that's not possible, I want to be the change I wish to see in the world. 
+
+  * Video explaining at an undergraduate level: "What's happening inside a cosmological simulation?". Includes a set of small-scale Enzo (Enzo-E?) simulations starting with DM only and adding each piece (hydro, chemistry, etc.) one by one. This can be a good exercise in using Enzo/Enzo-E and a decent teaching/outreach tool. This paper, [Somerville & Dave (2015)](https://www.annualreviews.org/doi/pdf/10.1146/annurev-astro-082812-140951), is probably a good place to start.
+
+  * Is there an existing review of stellar/AGN feedback models in cosmological simulation codes and if not, would it be worthwhile to do a literature review to catalog/analyze/compare them?

@@ -47,6 +47,23 @@ def MustRefineDarkMatter(pfilter, data):
     filter = data[("all", "particle_type")] == 4 # Must Refine Particle type
     return filter
 
+
+####################################################################################
+# Takes in a YT dataset object and a single halo and returns a YT Region object
+####################################################################################
+def to_YTRegion(ds, halo):
+    radius = ds.quan(halo[Fields.RADIUS], 'Mpc')
+    quans = [ds.quan(x, 'Mpc') for x in [\
+                                         halo[Fields.XPOS],\
+                                         halo[Fields.YPOS],\
+                                         halo[Fields.ZPOS]]]
+    
+    halo_pos =  np.array(quans) / ds.domain_width.to('Mpc').value
+
+    sphere = ds.sphere(halo_pos, radius)
+    return sphere
+
+
 ##########################################################
 # Conditional Print
 # prints only if the condition is true
