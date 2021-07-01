@@ -3,9 +3,11 @@
 ### Make a movie to feel better about yourself
 
 - Make it a 6x4 for each field along with a tracker at the bottom to see where we are in the space
-- <span style="color:#04e022">Try out the script with more cores and more memory per core</span> Seems to work pretty damn well
-- Try changing the code to use `set_data` instead of replotting
-- Need to run a memory profiler, possibly [this one](https://pypi.org/project/memory-profiler/) because we're running out of memory when running the script on big box on the compute nodes. 
+- Movie prototype needs to re-issue processes until movie is done
+- Add plotting code to movie
+- <span style="color:#04e022">Try changing the code to use `set_data` instead of replotting </span>
+  - <span style="color:#ff0000">Did this, didn't work</span> 
+- <span style="color:#04e022">Need to run a memory profiler, possibly [this one](https://pypi.org/project/memory-profiler/) because we're running out of memory when running the script on big box on the compute nodes. </span>
 - Run the damn thing for real
 
 ### Do some research for your feedback talk

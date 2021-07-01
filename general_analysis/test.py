@@ -11,8 +11,9 @@ from memory_profiler import profile
 run_test = int(sys.argv[1])
 nframes = int(sys.argv[2])
 
-ds_fname='/mnt/research/galaxies-REU/sims/cosmological/set1_LR/halo_008508/RD0042/RD0042'
-#ds_fname='/mnt/home/llorente/cosmo_bigbox/25Mpc_512/RD0265/RD0265'
+
+#ds_fname='/mnt/research/galaxies-REU/sims/cosmological/set1_LR/halo_008508/RD0042/RD0042'
+ds_fname='/mnt/home/llorente/cosmo_bigbox/25Mpc_512/RD0265/RD0265'
 ds = yt.load(ds_fname)
 #ds.add_particle_filter("stars")
 
@@ -126,3 +127,4 @@ elif run_test == 5:
     result = test_func5()
 
 print(f"Final product is {sys.getsizeof(result)/(2**20)} MB")
+

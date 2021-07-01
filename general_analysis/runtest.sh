@@ -8,7 +8,7 @@ for test in 1 2 3 4 5
 do 
 echo "# Test ${test}" >> ytProjMemTest.md
 echo "" >> ytProjMemTest.md
-    for frames in 1 10 300   
+    for frames in 1 10   
     do 
         echo "" >> ytProjMemTest.md
         echo "## Creating ${frames} frame(s) from dataset" >> ytProjMemTest.md
