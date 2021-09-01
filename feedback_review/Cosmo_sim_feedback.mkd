@@ -1,0 +1,54 @@
+# Outline for <i>Feedback in Cosmological Simulations</i>
+
+# Introduction
+
+- Quick definition of feedback
+
+- A brief history of feedback in cosmology simulations
+
+- An overview of modern approaches to stellar feedback
+
+- Introduction to AGN feedback
+
+# A quick primer on stellar feedback
+
+The basic process of galaxy formation goes like this. As dark matter falls into halos it causes gas to fall into the potential wells it creates. That gas cools down, forms clumps, and then clumps attract other clumps and being merging into even larger clumps. The gas in the big clumps cools even more and begins to fragment into dense clouds that can collapse under their own gravity and form stars. As the larger stars burn themselves out, they undergo core-collapse and explode in a Type II supernova. The energy from these supernovae preferentially drives gas with low angular momentum out of the proto-galaxy's potential well where it can mix with the halo gas and start to pick up angular momentum due to both mixing and torque effects. Much later, that gas can begin to accrete back onto the outer regions of the galaxy where it can begin to form a disk.
+
+- diagram of galaxy illustrating the concept
+
+In the 90s and early 00s, simulations with either inefficient or no feedback confirm that some process is needed to suppress star formation and gas cooling and drive an outflow of baryonic gas. These simulations produced galaxies with a high number of baryons concentrated heavily in the galactic core creating an over-abundance of bulge galaxies. Because of this, a lot of the early focus on feedback implementations focused on the creation of a stable disk in addition to trying to match observed statistical relationships like Tully-Fisher or Kennicut-Schmidt. 
+
+These images are a selection of results from the Aquila comparison project. These three galaxies used the Gadget SPH code with slightly different feedback implementations. The first is standard Gadget using a thermal dump method (which I will explain in more detail later), the second gets some help from a black hole kinetic feedback model, and the third gets help from cosmic ray heating. I chose this image because the feedback models used were deemed ineffective and failed to drive outflows or suppress star formation and this serves as a really good illustration of the effect on the galactic scale. 
+
+So we know already that a feedback process is necessary, but there's a problem.
+
+Modeling physically-accurate stellar processes and radiation transfer is technologically infeasible at the scale of a galaxy, let alone large cosmological simulations.
+
+ - Size comparison slide showing order of magnitude comparisons of e.g. 100 Mpc box, Milky way radius, a red giant, the Sun
+
+ 
+
+# Overview of Stellar Feedback Models
+
+
+So subgrid models of stellar feedback are necessary to produce the observed properties of galaxies. There is some consistency in the literature with regards to naming conventions and implementation details so I will mostly be following the conventions set by Rosdahl et al 2017, but I make sure to include alternate names where applicable. 
+
+Thermal dump models are the most common and straightforward. They are typically implemented by a direct injection of thermal energy into a cell (mesh codes) or particle (SPH) where either star formation or a supernova has occurred. Since the individual stars cannot be resolved, the amount of energy injected is the time-integrated supernova energy of a given stellar population based on some established initial mass function. Thermal dump models suffer from an over-cooling problem where the injected energy gets radiated away too quickly for the hydrodynamics to respond adequately. The reason for this is that thermal energy distributed over low resoultion gas mass resulted in too little energy across too much stuff, leading to lower temperatures located at the peak of the cooling curve. *Simulations run during the 90s (Katz et al 1992, 1996) that used this model found that the feedback was too weak to drive outflows and suppress star formation, and so did not create galactic disks.*
+
+The Delayed Cooling model attempts to sidestep this over-cooling problem by cheating, basically. It turns off the cooling for gas heated by supernova feedback, typically using the expected Sedov blast wave radius as the limit for delayed cooling. This actually works surprisingly well at creating mass outflows and reproducing observed main-sequence star formation rates and the Kennicutt-Schmidt relation. In Rosdahl et al 2017 they compare each of five different feedback models; delayed cooling was the least physically motivated, but also performed the best at reproducing observations. They called this result "discouraging".
+
+One of the issues with delayed cooling besides the unphysicality of just turning off cooling is the abundance of gas it creates that belongs to the "forbidden zone". 
+
+- Fig 8 Rosdahl et al 2017
+
+
+
+
+| Model       | Description | Example Paper |
+| ----------- | ----------- | ----------- |
+| Delayed Cooling Model      | SN energy is injected into gas, but cooling is turned off for gas inside the expected Sedov blast wave.       |  [Thacker & Couchman 2000](https://arxiv.org/pdf/astro-ph/0001276.pdf)     |
+| Stochastic Thermal Feedback   | Mean thermal energy injection per unit formed stellar mass is fixed. Neighboring star particles are heated IFF their temperatures can be moved above a certain temperature threshold.        |[Dalla Veccia & Schaye 2012](https://arxiv.org/pdf/1203.5667.pdf)|
+|Two-phase approach|Hot and cold gas are evolved separately with SPH. SN energy is decoupled from hydro and only released (recoupled?) when it can become a constituent of the hot phase.|[C. Scannapieco et al. 2006](https://cds.cern.ch/record/933843/files/0603174.pdf)|
+|Wind Feedback|A fraction of energy released by massive stars is injected into surrounding gas as energy or momentum that drives it away from the star-forming region.|[Oppenhiemer & Dave 2006](https://arxiv.org/pdf/astro-ph/0605651.pdf)|
+
+

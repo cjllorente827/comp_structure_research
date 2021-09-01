@@ -1,19 +1,37 @@
 # Current Tasks
 
-### Make a movie to feel better about yourself
+### Update Google slides with notes about what everything is
 
-- Make it a 6x4 for each field along with a tracker at the bottom to see where we are in the space
+### Read Quenching papers in Zotero
+
+### Read Mark's review paper before group meeting Aug 10
+
+### Analysis products
+
+- Add redshift 3 to metallicity over time plot
+
+
+### Make a movie
+
+- 2x2 traveling projection with density, temperature, metallicity, and stellar density
+- See if we can kick that motherfucker up to 30fps
+- Make movies for redshifts 0,1,2,3
+
+### Login to XSEDE/Ranch and figure out how to move the data over to HPCC
+
+### Look at FIRE and Illustris AGN feedback tests
+
+### Make improvements to blk
+
+- <span style="color:#ff0000">Make it attempt to use yt's intrinsic `save_as_dataset` functions.</span>
+  - This doesn't work. Saving as a dataset requires yt to re-parse the hierarchy and query fields and the whole point of blk is to avoid that wherever possible.
 - Movie prototype needs to re-issue processes until movie is done
-- Add plotting code to movie
-- <span style="color:#04e022">Try changing the code to use `set_data` instead of replotting </span>
-  - <span style="color:#ff0000">Did this, didn't work</span> 
-- <span style="color:#04e022">Need to run a memory profiler, possibly [this one](https://pypi.org/project/memory-profiler/) because we're running out of memory when running the script on big box on the compute nodes. </span>
-- Run the damn thing for real
+- Movie protoype needs to accept movie file name as argument
+- Movie prototype needs to use ffmpeg instead of imagemagick
+- Movie prototype needs to take arguments to pass to query, analysis, and plot functions
+- Movie prototype should be converted to non-prototype code with tests
 
-### Do some research for your feedback talk
-
-
-# Task List
+# Analysis Tasks
 
  * Create analysis scripts for measuring bulk halo properties over time and compare to observed relations
     * SMHM 
@@ -39,6 +57,106 @@
 
 
 # Research Journal
+
+<details>
+  <summary><i>HPCC Deleted the big box data off SCRATCH (update) and meeting with Brian</i>:: August 19, 2021 </summary>
+
+The issue is that untarred files conserve their last modified date unless a specific flag is set while untarring. So gotta make sure to do that next time. 
+
+Brian wants to talk about my dissertation and what that's going to be so I need to re-read the proposals before next week to make sure I understand the general vibe of what my dissertation is allowed to be. 
+
+</details>
+
+<details>
+  <summary><i>HPCC Deleted the big box data off SCRATCH</i>:: August 18, 2021 </summary>
+
+<strike>Possibly because of the maintenance that was done yesterday.</strike> Not sure why but all the query cache files stayed intact. All of the more recently added bigbox data was purged completely. 
+
+</details>
+
+
+<details>
+  <summary><i>Uncompressed FOGGIE Bigbox sims</i>:: August 16, 2021 </summary>
+
+Uncompressed both FOGGIE bigbox simulations into `$SCRATCH/bigbox on hpcc` . Total space used is 37T. 
+
+</details>
+
+<details>
+  <summary><i>Discuss with Brian about metals</i>:: July 31, 2021 </summary>
+
+Looking at the video of the 25Mpc sim, there's a strict divide between the high metallicity/hi-temp gas that galaxies blow out into the surrounding medium. If one were trying to study how far metals can be ejected from a galaxy, one way might be to start from the CGM and drift outward until a void appeared. Whether this is observationally feasible is an obvious issue, but it should be worth discussing at least as an exercise. 
+
+</details>
+
+<details>
+  <summary><i>Weird pitfalls with the 2x2 code</i>:: July 31, 2021 </summary>
+
+There seems to be an issue with using tmux and making plots. Whenever I disconnect from the session, it seems to unload the matplotlib backend used to make the plots and causes it to crash on the Plotting step. Query and Analysis steps still work and plotting doesn't take too long so its not a big deal, but it will definitely be annoying if I can't just let this thing run overnight or over lunch. 
+
+The small dataset bugs out when inspecting metallicity or stellar density, probably because it has no stars. I believe this is causing the issue where all fields return NaN for everything because I don't see this behavior from other datasets.
+
+</details>
+
+
+<details>
+  <summary><i>Lessons learned from completed tasks</i>:: July 26, 2021 </summary>
+
+yt's `save_dataset()` method isn't gonna work with blk. All it does is save the dataset in an hdf5 format which needs to be re-parsed. The whole point is skip the parsing step after doing it once. 
+
+yt's `set_data()` is not a low-cost solution to creating animations in yt.
+
+</details>
+
+<details>
+  <summary><i>Location of all Big Box outputs</i>:: July 26, 2021 </summary>
+
+All Big Box outputs are located on the Ranch archival system on TACC.
+
+Path:
+```
+/stornext/ranch_01/ranch/projects/TG-AST090040/CGM_simulations/CGM_big_boxes/
+```
+
+</details>
+
+<details>
+  <summary><i>Useful ffmpeg snippets</i>:: July 7, 2021 </summary>
+
+
+load ffmpeg on hpcc
+
+```
+module load GCCcore/10.2.0 FFmpeg/4.3.1
+
+```
+
+Make a move from sequentially numbered images
+
+```
+ffmpeg -start_number 0 -framerate 5 -i tmp_%04d.png -s 1080x720 -r 30 -vcodec libx264 -pix_fmt yuv420p 25Mpc_density.mp4
+```
+
+</details>
+
+<details>
+  <summary><i>blk cannot use yt's save_object() method</i>:: July 6, 2021 </summary>
+The save_object/load_object methods are being removed in yt for lack of use. The code may still be useful though, so here is a link to the commit that removed them.
+
+[Link](https://github.com/yt-project/yt/pull/2793/commits/3b4d43c9872d7b72b068343e14be68341a03b1ae)
+
+For the time being, I'm just going to insist that people who want to use my code save data that can be serialized with pickle automatically. If enough need develops that people really actually need yt objects we can figure that out later.
+
+</details>
+
+<details>
+  <summary><i>Progress on the thin projection step through </i>:: July 1, 2021 </summary>
+  Made this with the small dataset
+
+![Alt text](general_analysis/RD0042_density_walkthrough.gif)
+
+</details>
+
 <details>
   <summary><i>Progress on the thin projection step through </i>:: June 18, 2021 </summary>
   Made this with the small dataset

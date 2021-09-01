@@ -64,3 +64,12 @@ Voit 2015 for comparison
 
 
 </details>
+
+<details>
+<summary>Phase Diagrams (full box)</summary>
+
+![phase_z0](imgs/25Mpc_phase_z0.png)
+![phase_z1](imgs/25Mpc_phase_z1.png)
+![phase_z2](imgs/25Mpc_phase_z2.png)
+
+</details>

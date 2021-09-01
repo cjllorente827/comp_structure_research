@@ -9,19 +9,19 @@ Filename: test.py
 
 Line #    Mem usage    Increment  Occurences   Line Contents
 ============================================================
-    25    131.1 MiB    131.1 MiB           1   @profile
-    26                                         def test_func1():
-    27                                             
-    28    136.1 MiB      5.0 MiB           1       frame_data = np.zeros((nframes, 800, 800))
-    29                                             
-    30   1893.6 MiB      0.0 MiB           2       for i in range(nframes):
-    31    136.2 MiB      0.1 MiB           1           next_slab = ds.r[:,:,i*vel : i*vel+dL]
-    32   1883.9 MiB   1747.7 MiB           1           plot = yt.ProjectionPlot(ds, 'z', 'density', data_source=next_slab, weight_field='density')
-    33                                         
-    34   1893.6 MiB      9.7 MiB           1           frame = np.array(plot.frb['density'])
-    35                                         
-    36   1893.6 MiB      0.0 MiB           1           frame_data[i] =  frame[:]
-    37   1893.6 MiB      0.0 MiB           1       return frame_data
+    26    127.1 MiB    127.1 MiB           1   @profile
+    27                                         def test_func1():
+    28                                             
+    29    131.9 MiB      4.8 MiB           1       frame_data = np.zeros((nframes, 800, 800))
+    30                                             
+    31   1889.8 MiB      0.0 MiB           2       for i in range(nframes):
+    32    132.0 MiB      0.1 MiB           1           next_slab = ds.r[:,:,i*vel : i*vel+dL]
+    33   1880.0 MiB   1748.0 MiB           1           plot = yt.ProjectionPlot(ds, 'z', 'density', data_source=next_slab, weight_field='density')
+    34                                         
+    35   1889.7 MiB      9.7 MiB           1           frame = np.array(plot.frb['density'])
+    36                                         
+    37   1889.8 MiB      0.1 MiB           1           frame_data[i] =  frame[:]
+    38   1889.8 MiB      0.0 MiB           1       return frame_data
 
 
 Final product is 4.8829345703125 MB
@@ -34,22 +34,47 @@ Filename: test.py
 
 Line #    Mem usage    Increment  Occurences   Line Contents
 ============================================================
-    25    132.0 MiB    132.0 MiB           1   @profile
-    26                                         def test_func1():
-    27                                             
-    28    132.0 MiB      0.0 MiB           1       frame_data = np.zeros((nframes, 800, 800))
-    29                                             
-    30   4244.3 MiB      0.0 MiB          11       for i in range(nframes):
-    31   3961.7 MiB      1.0 MiB          10           next_slab = ds.r[:,:,i*vel : i*vel+dL]
-    32   4230.4 MiB   3965.8 MiB          10           plot = yt.ProjectionPlot(ds, 'z', 'density', data_source=next_slab, weight_field='density')
-    33                                         
-    34   4240.1 MiB     96.5 MiB          10           frame = np.array(plot.frb['density'])
-    35                                         
-    36   4244.3 MiB     49.0 MiB          10           frame_data[i] =  frame[:]
-    37   4244.3 MiB      0.0 MiB           1       return frame_data
+    26    129.3 MiB    129.3 MiB           1   @profile
+    27                                         def test_func1():
+    28                                             
+    29    129.3 MiB      0.0 MiB           1       frame_data = np.zeros((nframes, 800, 800))
+    30                                             
+    31   4240.3 MiB      0.0 MiB          11       for i in range(nframes):
+    32   3956.9 MiB      0.7 MiB          10           next_slab = ds.r[:,:,i*vel : i*vel+dL]
+    33   4225.7 MiB   3964.8 MiB          10           plot = yt.ProjectionPlot(ds, 'z', 'density', data_source=next_slab, weight_field='density')
+    34                                         
+    35   4235.4 MiB     96.7 MiB          10           frame = np.array(plot.frb['density'])
+    36                                         
+    37   4240.3 MiB     48.8 MiB          10           frame_data[i] =  frame[:]
+    38   4240.3 MiB      0.0 MiB           1       return frame_data
 
 
 Final product is 48.8282470703125 MB
+```
+
+## Creating 300 frame(s) from dataset
+
+```
+Filename: test.py
+
+Line #    Mem usage    Increment  Occurences   Line Contents
+============================================================
+    26    128.4 MiB    128.4 MiB           1   @profile
+    27                                         def test_func1():
+    28                                             
+    29    128.4 MiB      0.0 MiB           1       frame_data = np.zeros((nframes, 800, 800))
+    30                                             
+    31  36288.9 MiB   -286.5 MiB         301       for i in range(nframes):
+    32  36285.3 MiB   -260.1 MiB         300           next_slab = ds.r[:,:,i*vel : i*vel+dL]
+    33  36285.5 MiB  33046.3 MiB         300           plot = yt.ProjectionPlot(ds, 'z', 'density', data_source=next_slab, weight_field='density')
+    34                                         
+    35  36285.5 MiB   1051.9 MiB         300           frame = np.array(plot.frb['density'])
+    36                                         
+    37  36288.9 MiB   1142.0 MiB         300           frame_data[i] =  frame[:]
+    38  36288.9 MiB      0.0 MiB           1       return frame_data
+
+
+Final product is 1464.8438720703125 MB
 ```
 # Test 2
 
@@ -61,28 +86,28 @@ Filename: test.py
 
 Line #    Mem usage    Increment  Occurences   Line Contents
 ============================================================
-    39    130.3 MiB    130.3 MiB           1   @profile
-    40                                         def test_func2():
-    41                                             
-    42    136.3 MiB      6.0 MiB           1       frame_data = np.zeros((nframes, 800, 800))
-    43    136.3 MiB      0.0 MiB           1       gc.disable()
-    44                                             
-    45   1864.7 MiB      0.0 MiB           2       for i in range(nframes):
-    46    136.4 MiB      0.0 MiB           1           next_slab = ds.r[:,:,i*vel : i*vel+dL]
-    47   1854.9 MiB   1718.6 MiB           1           plot = yt.ProjectionPlot(ds, 'z', 'density', data_source=next_slab, weight_field='density')
-    48                                         
-    49   1864.7 MiB      9.8 MiB           1           frame = np.array(plot.frb['density'])
-    50                                         
-    51   1864.7 MiB      0.0 MiB           1           frame_data[i] =  frame[:]
-    52                                         
-    53   1864.7 MiB      0.0 MiB           1           del frame
-    54   1864.7 MiB      0.0 MiB           1           del next_slab
-    55   1864.7 MiB      0.0 MiB           1           del plot
-    56                                         
-    57   1864.7 MiB      0.0 MiB           1           gc.collect()
-    58                                         
-    59   1864.7 MiB      0.0 MiB           1       gc.enable()
-    60   1864.7 MiB      0.0 MiB           1       return frame_data
+    40    133.3 MiB    133.3 MiB           1   @profile
+    41                                         def test_func2():
+    42                                             
+    43    139.5 MiB      6.2 MiB           1       frame_data = np.zeros((nframes, 800, 800))
+    44    139.5 MiB      0.0 MiB           1       gc.disable()
+    45                                             
+    46   1867.8 MiB      0.0 MiB           2       for i in range(nframes):
+    47    139.6 MiB      0.1 MiB           1           next_slab = ds.r[:,:,i*vel : i*vel+dL]
+    48   1858.1 MiB   1718.5 MiB           1           plot = yt.ProjectionPlot(ds, 'z', 'density', data_source=next_slab, weight_field='density')
+    49                                         
+    50   1867.9 MiB      9.7 MiB           1           frame = np.array(plot.frb['density'])
+    51                                         
+    52   1867.9 MiB      0.0 MiB           1           frame_data[i] =  frame[:]
+    53                                         
+    54   1867.9 MiB      0.0 MiB           1           del frame
+    55   1867.9 MiB      0.0 MiB           1           del next_slab
+    56   1867.9 MiB      0.0 MiB           1           del plot
+    57                                         
+    58   1867.8 MiB     -0.0 MiB           1           gc.collect()
+    59                                         
+    60   1867.8 MiB      0.0 MiB           1       gc.enable()
+    61   1867.8 MiB      0.0 MiB           1       return frame_data
 
 
 Final product is 4.8829345703125 MB
@@ -95,31 +120,65 @@ Filename: test.py
 
 Line #    Mem usage    Increment  Occurences   Line Contents
 ============================================================
-    39    132.2 MiB    132.2 MiB           1   @profile
-    40                                         def test_func2():
-    41                                             
-    42    132.2 MiB      0.0 MiB           1       frame_data = np.zeros((nframes, 800, 800))
-    43    132.2 MiB      0.0 MiB           1       gc.disable()
-    44                                             
-    45   2528.1 MiB      0.0 MiB          11       for i in range(nframes):
-    46   2446.1 MiB      0.1 MiB          10           next_slab = ds.r[:,:,i*vel : i*vel+dL]
-    47   2514.7 MiB   2249.7 MiB          10           plot = yt.ProjectionPlot(ds, 'z', 'density', data_source=next_slab, weight_field='density')
-    48                                         
-    49   2524.2 MiB     96.5 MiB          10           frame = np.array(plot.frb['density'])
-    50                                         
-    51   2528.0 MiB     49.3 MiB          10           frame_data[i] =  frame[:]
-    52                                         
-    53   2528.0 MiB      0.0 MiB          10           del frame
-    54   2528.0 MiB      0.0 MiB          10           del next_slab
-    55   2528.0 MiB      0.0 MiB          10           del plot
-    56                                         
-    57   2528.1 MiB      0.2 MiB          10           gc.collect()
-    58                                         
-    59   2528.1 MiB      0.0 MiB           1       gc.enable()
-    60   2528.1 MiB      0.0 MiB           1       return frame_data
+    40    139.0 MiB    139.0 MiB           1   @profile
+    41                                         def test_func2():
+    42                                             
+    43    139.0 MiB      0.0 MiB           1       frame_data = np.zeros((nframes, 800, 800))
+    44    139.0 MiB      0.0 MiB           1       gc.disable()
+    45                                             
+    46   2534.9 MiB      0.0 MiB          11       for i in range(nframes):
+    47   2451.5 MiB      0.1 MiB          10           next_slab = ds.r[:,:,i*vel : i*vel+dL]
+    48   2520.1 MiB   2249.9 MiB          10           plot = yt.ProjectionPlot(ds, 'z', 'density', data_source=next_slab, weight_field='density')
+    49                                         
+    50   2529.8 MiB     96.2 MiB          10           frame = np.array(plot.frb['density'])
+    51                                         
+    52   2534.6 MiB     48.8 MiB          10           frame_data[i] =  frame[:]
+    53                                         
+    54   2534.9 MiB      0.5 MiB          10           del frame
+    55   2534.9 MiB      0.0 MiB          10           del next_slab
+    56   2534.9 MiB      0.0 MiB          10           del plot
+    57                                         
+    58   2534.9 MiB      0.3 MiB          10           gc.collect()
+    59                                         
+    60   2534.9 MiB      0.0 MiB           1       gc.enable()
+    61   2534.9 MiB      0.0 MiB           1       return frame_data
 
 
 Final product is 48.8282470703125 MB
+```
+
+## Creating 300 frame(s) from dataset
+
+```
+Filename: test.py
+
+Line #    Mem usage    Increment  Occurences   Line Contents
+============================================================
+    40    133.0 MiB    133.0 MiB           1   @profile
+    41                                         def test_func2():
+    42                                             
+    43    133.0 MiB      0.0 MiB           1       frame_data = np.zeros((nframes, 800, 800))
+    44    133.0 MiB      0.0 MiB           1       gc.disable()
+    45                                             
+    46  12893.6 MiB    -91.5 MiB         301       for i in range(nframes):
+    47  12861.8 MiB    -91.3 MiB         300           next_slab = ds.r[:,:,i*vel : i*vel+dL]
+    48  12879.0 MiB   9343.2 MiB         300           plot = yt.ProjectionPlot(ds, 'z', 'density', data_source=next_slab, weight_field='density')
+    49                                         
+    50  12888.9 MiB   2735.3 MiB         300           frame = np.array(plot.frb['density'])
+    51                                         
+    52  12893.8 MiB   1463.1 MiB         300           frame_data[i] =  frame[:]
+    53                                         
+    54  12893.8 MiB      1.0 MiB         300           del frame
+    55  12893.8 MiB      0.5 MiB         300           del next_slab
+    56  12893.8 MiB      0.2 MiB         300           del plot
+    57                                         
+    58  12893.6 MiB   -874.4 MiB         300           gc.collect()
+    59                                         
+    60  12893.6 MiB      0.0 MiB           1       gc.enable()
+    61  12893.6 MiB      0.0 MiB           1       return frame_data
+
+
+Final product is 1464.8438720703125 MB
 ```
 # Test 3
 
@@ -131,21 +190,21 @@ Filename: test.py
 
 Line #    Mem usage    Increment  Occurences   Line Contents
 ============================================================
-    62    130.8 MiB    130.8 MiB           1   @profile
-    63                                         def test_func3():
-    64                                             
-    65    137.0 MiB      6.2 MiB           1       frame_data = np.zeros((nframes, 800, 800))
-    66    137.2 MiB      0.2 MiB           1       next_slab = ds.r[:,:,0 : dL]
-    67   1883.2 MiB   1746.0 MiB           1       plot = yt.ProjectionPlot(ds, 'z', 'density', data_source=next_slab, weight_field='density')
-    68                                         
-    69   2106.2 MiB      0.0 MiB           2       for i in range(nframes):
-    70   1883.2 MiB      0.0 MiB           1           next_slab = ds.r[:,:,i*vel : i*vel+dL]
-    71   2097.1 MiB    213.8 MiB           1           plot._switch_ds(ds, data_source=next_slab)
-    72                                         
-    73   2106.1 MiB      9.0 MiB           1           frame = np.array(plot.frb['density'])
-    74                                         
-    75   2106.2 MiB      0.2 MiB           1           frame_data[i] =  frame[:]
-    76   2106.2 MiB      0.0 MiB           1       return frame_data
+    63    131.0 MiB    131.0 MiB           1   @profile
+    64                                         def test_func3():
+    65                                             
+    66    135.9 MiB      4.9 MiB           1       frame_data = np.zeros((nframes, 800, 800))
+    67    136.0 MiB      0.1 MiB           1       next_slab = ds.r[:,:,0 : dL]
+    68   1883.3 MiB   1747.3 MiB           1       plot = yt.ProjectionPlot(ds, 'z', 'density', data_source=next_slab, weight_field='density')
+    69                                         
+    70   2107.0 MiB      0.0 MiB           2       for i in range(nframes):
+    71   1883.3 MiB      0.0 MiB           1           next_slab = ds.r[:,:,i*vel : i*vel+dL]
+    72   2097.8 MiB    214.5 MiB           1           plot._switch_ds(ds, data_source=next_slab)
+    73                                         
+    74   2106.8 MiB      9.0 MiB           1           frame = np.array(plot.frb['density'])
+    75                                         
+    76   2107.0 MiB      0.2 MiB           1           frame_data[i] =  frame[:]
+    77   2107.0 MiB      0.0 MiB           1       return frame_data
 
 
 Final product is 4.8829345703125 MB
@@ -158,24 +217,51 @@ Filename: test.py
 
 Line #    Mem usage    Increment  Occurences   Line Contents
 ============================================================
-    62    130.3 MiB    130.3 MiB           1   @profile
-    63                                         def test_func3():
-    64                                             
-    65    130.3 MiB      0.0 MiB           1       frame_data = np.zeros((nframes, 800, 800))
-    66    130.5 MiB      0.2 MiB           1       next_slab = ds.r[:,:,0 : dL]
-    67   1879.9 MiB   1749.4 MiB           1       plot = yt.ProjectionPlot(ds, 'z', 'density', data_source=next_slab, weight_field='density')
-    68                                         
-    69   4442.2 MiB      0.0 MiB          11       for i in range(nframes):
-    70   4182.9 MiB      0.5 MiB          10           next_slab = ds.r[:,:,i*vel : i*vel+dL]
-    71   4433.6 MiB   2465.9 MiB          10           plot._switch_ds(ds, data_source=next_slab)
-    72                                         
-    73   4437.7 MiB     47.1 MiB          10           frame = np.array(plot.frb['density'])
-    74                                         
-    75   4442.2 MiB     48.7 MiB          10           frame_data[i] =  frame[:]
-    76   4442.2 MiB      0.0 MiB           1       return frame_data
+    63    134.3 MiB    134.3 MiB           1   @profile
+    64                                         def test_func3():
+    65                                             
+    66    134.3 MiB      0.0 MiB           1       frame_data = np.zeros((nframes, 800, 800))
+    67    134.4 MiB      0.0 MiB           1       next_slab = ds.r[:,:,0 : dL]
+    68   1881.7 MiB   1747.3 MiB           1       plot = yt.ProjectionPlot(ds, 'z', 'density', data_source=next_slab, weight_field='density')
+    69                                         
+    70   4444.7 MiB      0.0 MiB          11       for i in range(nframes):
+    71   4185.0 MiB      0.8 MiB          10           next_slab = ds.r[:,:,i*vel : i*vel+dL]
+    72   4435.7 MiB   2466.6 MiB          10           plot._switch_ds(ds, data_source=next_slab)
+    73                                         
+    74   4439.9 MiB     46.9 MiB          10           frame = np.array(plot.frb['density'])
+    75                                         
+    76   4444.7 MiB     48.8 MiB          10           frame_data[i] =  frame[:]
+    77   4444.7 MiB      0.0 MiB           1       return frame_data
 
 
 Final product is 48.8282470703125 MB
+```
+
+## Creating 300 frame(s) from dataset
+
+```
+Filename: test.py
+
+Line #    Mem usage    Increment  Occurences   Line Contents
+============================================================
+    63    130.9 MiB    130.9 MiB           1   @profile
+    64                                         def test_func3():
+    65                                             
+    66    130.9 MiB      0.0 MiB           1       frame_data = np.zeros((nframes, 800, 800))
+    67    131.1 MiB      0.2 MiB           1       next_slab = ds.r[:,:,0 : dL]
+    68   1881.0 MiB   1749.9 MiB           1       plot = yt.ProjectionPlot(ds, 'z', 'density', data_source=next_slab, weight_field='density')
+    69                                         
+    70  38191.0 MiB   -288.8 MiB         301       for i in range(nframes):
+    71  38188.0 MiB   -265.1 MiB         300           next_slab = ds.r[:,:,i*vel : i*vel+dL]
+    72  38188.0 MiB  33929.4 MiB         300           plot._switch_ds(ds, data_source=next_slab)
+    73                                         
+    74  38188.0 MiB    336.1 MiB         300           frame = np.array(plot.frb['density'])
+    75                                         
+    76  38191.0 MiB   1154.4 MiB         300           frame_data[i] =  frame[:]
+    77  38191.0 MiB      0.0 MiB           1       return frame_data
+
+
+Final product is 1464.8438720703125 MB
 ```
 # Test 4
 
@@ -187,20 +273,20 @@ Filename: test.py
 
 Line #    Mem usage    Increment  Occurences   Line Contents
 ============================================================
-    81    133.0 MiB    133.0 MiB           1   @profile
-    82                                         def test_func4():
-    83                                         
-    84    137.7 MiB      4.8 MiB           1       frame_data = np.zeros((nframes, 800, 800))
-    85    137.9 MiB      0.1 MiB           1       next_slab = ds.r[:,:,0 : dL]
-    86                                             
-    87   1869.8 MiB      0.0 MiB           2       for i in range(nframes):
-    88    137.9 MiB      0.0 MiB           1           next_slab = ds.r[:,:,i*vel : i*vel+dL]
-    89   1867.2 MiB   1729.3 MiB           1           plot = ds.proj('density', 'z', weight_field='density', data_source=next_slab)
-    90   1867.2 MiB      0.0 MiB           1           frb = plot.to_frb(1, 800)
-    91   1869.7 MiB      2.5 MiB           1           frame = np.array(frb['density'])
-    92                                         
-    93   1869.8 MiB      0.2 MiB           1           frame_data[i] =  frame[:]
-    94   1869.8 MiB      0.0 MiB           1       return frame_data
+    79    132.6 MiB    132.6 MiB           1   @profile
+    80                                         def test_func4():
+    81                                         
+    82    136.6 MiB      4.0 MiB           1       frame_data = np.zeros((nframes, 800, 800))
+    83    136.7 MiB      0.1 MiB           1       next_slab = ds.r[:,:,0 : dL]
+    84                                             
+    85   1867.6 MiB      0.0 MiB           2       for i in range(nframes):
+    86    136.7 MiB      0.0 MiB           1           next_slab = ds.r[:,:,i*vel : i*vel+dL]
+    87   1865.2 MiB   1728.5 MiB           1           plot = ds.proj('density', 'z', weight_field='density', data_source=next_slab)
+    88   1865.2 MiB      0.0 MiB           1           frb = plot.to_frb(1, 800)
+    89   1867.6 MiB      2.4 MiB           1           frame = np.array(frb['density'])
+    90                                         
+    91   1867.6 MiB      0.0 MiB           1           frame_data[i] =  frame[:]
+    92   1867.6 MiB      0.0 MiB           1       return frame_data
 
 
 Final product is 4.8829345703125 MB
@@ -213,23 +299,49 @@ Filename: test.py
 
 Line #    Mem usage    Increment  Occurences   Line Contents
 ============================================================
-    81    134.3 MiB    134.3 MiB           1   @profile
-    82                                         def test_func4():
-    83                                         
-    84    134.3 MiB      0.0 MiB           1       frame_data = np.zeros((nframes, 800, 800))
-    85    134.3 MiB      0.0 MiB           1       next_slab = ds.r[:,:,0 : dL]
-    86                                             
-    87   4108.5 MiB      0.0 MiB          11       for i in range(nframes):
-    88   3839.2 MiB      0.9 MiB          10           next_slab = ds.r[:,:,i*vel : i*vel+dL]
-    89   4101.5 MiB   3900.0 MiB          10           plot = ds.proj('density', 'z', weight_field='density', data_source=next_slab)
-    90   4101.5 MiB      0.0 MiB          10           frb = plot.to_frb(1, 800)
-    91   4103.7 MiB     24.5 MiB          10           frame = np.array(frb['density'])
-    92                                         
-    93   4108.5 MiB     48.8 MiB          10           frame_data[i] =  frame[:]
-    94   4108.5 MiB      0.0 MiB           1       return frame_data
+    79    140.5 MiB    140.5 MiB           1   @profile
+    80                                         def test_func4():
+    81                                         
+    82    140.5 MiB      0.0 MiB           1       frame_data = np.zeros((nframes, 800, 800))
+    83    140.7 MiB      0.2 MiB           1       next_slab = ds.r[:,:,0 : dL]
+    84                                             
+    85   4117.5 MiB      0.0 MiB          11       for i in range(nframes):
+    86   3848.0 MiB      1.1 MiB          10           next_slab = ds.r[:,:,i*vel : i*vel+dL]
+    87   4110.4 MiB   3902.5 MiB          10           plot = ds.proj('density', 'z', weight_field='density', data_source=next_slab)
+    88   4110.4 MiB      0.0 MiB          10           frb = plot.to_frb(1, 800)
+    89   4112.6 MiB     24.5 MiB          10           frame = np.array(frb['density'])
+    90                                         
+    91   4117.5 MiB     48.7 MiB          10           frame_data[i] =  frame[:]
+    92   4117.5 MiB      0.0 MiB           1       return frame_data
 
 
 Final product is 48.8282470703125 MB
+```
+
+## Creating 300 frame(s) from dataset
+
+```
+Filename: test.py
+
+Line #    Mem usage    Increment  Occurences   Line Contents
+============================================================
+    79    132.6 MiB    132.6 MiB           1   @profile
+    80                                         def test_func4():
+    81                                         
+    82    132.8 MiB      0.2 MiB           1       frame_data = np.zeros((nframes, 800, 800))
+    83    132.9 MiB      0.0 MiB           1       next_slab = ds.r[:,:,0 : dL]
+    84                                             
+    85  65941.4 MiB      0.0 MiB         301       for i in range(nframes):
+    86  65718.1 MiB     19.8 MiB         300           next_slab = ds.r[:,:,i*vel : i*vel+dL]
+    87  65934.4 MiB  63599.7 MiB         300           plot = ds.proj('density', 'z', weight_field='density', data_source=next_slab)
+    88  65934.4 MiB      1.8 MiB         300           frb = plot.to_frb(1, 800)
+    89  65936.5 MiB    723.5 MiB         300           frame = np.array(frb['density'])
+    90                                         
+    91  65941.4 MiB   1463.7 MiB         300           frame_data[i] =  frame[:]
+    92  65941.4 MiB      0.0 MiB           1       return frame_data
+
+
+Final product is 1464.8438720703125 MB
 ```
 # Test 5
 
@@ -241,28 +353,28 @@ Filename: test.py
 
 Line #    Mem usage    Increment  Occurences   Line Contents
 ============================================================
-    94    130.3 MiB    130.3 MiB           1   @profile
+    94    132.9 MiB    132.9 MiB           1   @profile
     95                                         def test_func5():
     96                                         
-    97    135.1 MiB      4.8 MiB           1       frame_data = np.zeros((nframes, 800, 800))
-    98    135.1 MiB      0.0 MiB           1       gc.disable()
+    97    137.9 MiB      5.0 MiB           1       frame_data = np.zeros((nframes, 800, 800))
+    98    137.9 MiB      0.0 MiB           1       gc.disable()
     99                                             
-   100   1837.5 MiB      0.0 MiB           2       for i in range(nframes):
-   101    135.3 MiB      0.2 MiB           1           next_slab = ds.r[:,:,i*vel : i*vel+dL]
-   102   1835.0 MiB   1699.6 MiB           1           plot = ds.proj('density', 'z', weight_field='density', data_source=next_slab)
-   103   1835.0 MiB      0.0 MiB           1           frb = plot.to_frb(1, 800)
-   104   1837.5 MiB      2.5 MiB           1           frame = np.array(frb['density'])
+   100   1840.3 MiB      0.0 MiB           2       for i in range(nframes):
+   101    138.1 MiB      0.2 MiB           1           next_slab = ds.r[:,:,i*vel : i*vel+dL]
+   102   1837.7 MiB   1699.7 MiB           1           plot = ds.proj('density', 'z', weight_field='density', data_source=next_slab)
+   103   1837.7 MiB      0.0 MiB           1           frb = plot.to_frb(1, 800)
+   104   1840.1 MiB      2.4 MiB           1           frame = np.array(frb['density'])
    105                                         
-   106   1837.5 MiB      0.0 MiB           1           frame_data[i] =  frame[:]
+   106   1840.3 MiB      0.2 MiB           1           frame_data[i] =  frame[:]
    107                                         
-   108   1837.5 MiB      0.0 MiB           1           del frame
-   109   1837.5 MiB      0.0 MiB           1           del frb
-   110   1837.5 MiB      0.0 MiB           1           del plot
-   111   1837.5 MiB      0.0 MiB           1           del next_slab
-   112   1837.5 MiB      0.0 MiB           1           gc.collect()
+   108   1840.3 MiB      0.0 MiB           1           del frame
+   109   1840.3 MiB      0.0 MiB           1           del frb
+   110   1840.3 MiB      0.0 MiB           1           del plot
+   111   1840.3 MiB      0.0 MiB           1           del next_slab
+   112   1840.3 MiB      0.0 MiB           1           gc.collect()
    113                                         
-   114   1837.5 MiB      0.0 MiB           1       gc.enable()
-   115   1837.5 MiB      0.0 MiB           1       return frame_data
+   114   1840.3 MiB      0.0 MiB           1       gc.enable()
+   115   1840.3 MiB      0.0 MiB           1       return frame_data
 
 
 Final product is 4.8829345703125 MB
@@ -275,29 +387,63 @@ Filename: test.py
 
 Line #    Mem usage    Increment  Occurences   Line Contents
 ============================================================
-    94    127.0 MiB    127.0 MiB           1   @profile
+    94    133.2 MiB    133.2 MiB           1   @profile
     95                                         def test_func5():
     96                                         
-    97    127.0 MiB      0.0 MiB           1       frame_data = np.zeros((nframes, 800, 800))
-    98    127.0 MiB      0.0 MiB           1       gc.disable()
+    97    133.2 MiB      0.0 MiB           1       frame_data = np.zeros((nframes, 800, 800))
+    98    133.2 MiB      0.0 MiB           1       gc.disable()
     99                                             
-   100   2496.1 MiB      0.0 MiB          11       for i in range(nframes):
-   101   2412.8 MiB      0.2 MiB          10           next_slab = ds.r[:,:,i*vel : i*vel+dL]
-   102   2488.8 MiB   2294.4 MiB          10           plot = ds.proj('density', 'z', weight_field='density', data_source=next_slab)
-   103   2488.8 MiB      0.0 MiB          10           frb = plot.to_frb(1, 800)
-   104   2490.9 MiB     24.3 MiB          10           frame = np.array(frb['density'])
+   100   2502.2 MiB      0.0 MiB          11       for i in range(nframes):
+   101   2419.0 MiB      0.2 MiB          10           next_slab = ds.r[:,:,i*vel : i*vel+dL]
+   102   2495.0 MiB   2293.7 MiB          10           plot = ds.proj('density', 'z', weight_field='density', data_source=next_slab)
+   103   2495.0 MiB      0.0 MiB          10           frb = plot.to_frb(1, 800)
+   104   2497.2 MiB     25.0 MiB          10           frame = np.array(frb['density'])
    105                                         
-   106   2495.9 MiB     48.9 MiB          10           frame_data[i] =  frame[:]
+   106   2502.1 MiB     48.7 MiB          10           frame_data[i] =  frame[:]
    107                                         
-   108   2495.9 MiB      0.0 MiB          10           del frame
-   109   2495.9 MiB      0.0 MiB          10           del frb
-   110   2495.9 MiB      0.0 MiB          10           del plot
-   111   2495.9 MiB      0.0 MiB          10           del next_slab
-   112   2496.1 MiB      1.2 MiB          10           gc.collect()
+   108   2502.1 MiB      0.0 MiB          10           del frame
+   109   2502.1 MiB      0.0 MiB          10           del frb
+   110   2502.1 MiB      0.0 MiB          10           del plot
+   111   2502.1 MiB      0.0 MiB          10           del next_slab
+   112   2502.2 MiB      1.4 MiB          10           gc.collect()
    113                                         
-   114   2496.1 MiB      0.0 MiB           1       gc.enable()
-   115   2496.1 MiB      0.0 MiB           1       return frame_data
+   114   2502.2 MiB      0.0 MiB           1       gc.enable()
+   115   2502.2 MiB      0.0 MiB           1       return frame_data
 
 
 Final product is 48.8282470703125 MB
+```
+
+## Creating 300 frame(s) from dataset
+
+```
+Filename: test.py
+
+Line #    Mem usage    Increment  Occurences   Line Contents
+============================================================
+    94    131.2 MiB    131.2 MiB           1   @profile
+    95                                         def test_func5():
+    96                                         
+    97    131.2 MiB      0.0 MiB           1       frame_data = np.zeros((nframes, 800, 800))
+    98    131.2 MiB      0.0 MiB           1       gc.disable()
+    99                                             
+   100  12859.3 MiB      0.0 MiB         301       for i in range(nframes):
+   101  12827.8 MiB      0.0 MiB         300           next_slab = ds.r[:,:,i*vel : i*vel+dL]
+   102  12852.3 MiB  10517.2 MiB         300           plot = ds.proj('density', 'z', weight_field='density', data_source=next_slab)
+   103  12852.3 MiB      1.9 MiB         300           frb = plot.to_frb(1, 800)
+   104  12854.3 MiB    708.4 MiB         300           frame = np.array(frb['density'])
+   105                                         
+   106  12859.2 MiB   1463.7 MiB         300           frame_data[i] =  frame[:]
+   107                                         
+   108  12859.2 MiB      0.5 MiB         300           del frame
+   109  12859.2 MiB      0.0 MiB         300           del frb
+   110  12859.2 MiB      0.0 MiB         300           del plot
+   111  12859.2 MiB      0.5 MiB         300           del next_slab
+   112  12859.3 MiB     35.8 MiB         300           gc.collect()
+   113                                         
+   114  12859.3 MiB      0.0 MiB           1       gc.enable()
+   115  12859.3 MiB      0.0 MiB           1       return frame_data
+
+
+Final product is 1464.8438720703125 MB
 ```

@@ -1,6 +1,0 @@
-# General notes on Feedback in Cosmological Simulations
-
-## A brief history of feedback models in cosmological simulations
-
-## Where are we now?
-
